@@ -2,14 +2,14 @@ package com.joefrew.neuralnet;
 
 class Synapse implements NeuralInput, NeuralOutput {
 	
+	private double value = 0;
+	
 	public double getInput() {
-		// TODO Auto-generated method stub
-		return 0;
+		return this.value;
 	}
 
 	public void setOutput(double output) {
-		// TODO Auto-generated method stub
-		
+		this.value = output;		
 	}
 
 }
