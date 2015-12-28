@@ -1,0 +1,17 @@
+package com.joefrew.neuralnet;
+
+import junit.framework.TestCase;
+
+public class TestWeightedSynapse extends TestCase {
+	
+	private WeightedSynapse weightedSynapse;
+
+	protected void setUp() throws Exception {
+		super.setUp();
+	}
+
+	protected void tearDown() throws Exception {
+		super.tearDown();
+	}
+
+}

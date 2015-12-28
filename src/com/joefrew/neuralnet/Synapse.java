@@ -2,7 +2,7 @@ package com.joefrew.neuralnet;
 
 class Synapse implements NeuralInput, NeuralOutput {
 	
-	private double value = 0;
+	protected double value = 0;
 	
 	public double getInput() {
 		return this.value;

@@ -19,6 +19,12 @@ public class TestSynapse extends TestCase {
 	public void testInputForwarded() {
 		synapse.setOutput(5);
 		assertEquals("Neuron output does not match input.", synapse.getInput(), (double)5, 0);
+		
+		synapse.setOutput(10);
+		assertEquals("Neuron output does not match input.", synapse.getInput(), (double)10, 0);
+		
+		synapse.setOutput(-4.3);
+		assertEquals("Neuron output does not match input.", synapse.getInput(), (double)-4.3, 0);
 	}
 
 }
