@@ -24,36 +24,7 @@ public class TestAverageNeuron extends TestCase {
 		assertEquals(neuron.getValue(), 0, 0);
 	}
 	
-	/*
-	 * Creating some dummy input and output classes for testing the base neuron
-	 */
-	private class DummyInput implements NeuralInput {
-		
-		private double input;
-		
-		public DummyInput(double input) {
-			this.input = input;
-		}
 
-		public double getInput() {
-			return input;
-		}
-		
-	}
-	
-	private class DummyOutput implements NeuralOutput {
-		
-		private double output = 0;
-		
-		public void setOutput(double output) {
-			this.output = output;			
-		}
-		
-		public double getOutput() {
-			return output;
-		}
-		
-	}
 	
 	public void testAddingInputsAndOutputs() {
 		
@@ -65,17 +36,6 @@ public class TestAverageNeuron extends TestCase {
 		
 		assertTrue(neuron.getInputs().contains(input));
 		assertTrue(neuron.getOutputs().contains(output));
-	}
-	
-	/*
-	 * This dummy activation function simply forwards the input over to the output.
-	 */
-	private class DummyActivationFunction implements ActivationFunction {
-
-		public double activate(double input) {
-			return input;
-		}
-		
 	}
 	
 	public void testSimpleActivation() {
