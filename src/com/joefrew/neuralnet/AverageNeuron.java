@@ -1,6 +1,7 @@
 package com.joefrew.neuralnet;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.joefrew.neuralnet.activationfunct.ActivationFunction;
@@ -17,7 +18,8 @@ public class AverageNeuron implements Neuron, Serializable {
 	protected double value = 0;
 	protected ActivationFunction activationFunction;
 	
-	
+	protected List<NeuralInput> inputs = new ArrayList<NeuralInput>();
+	protected List<NeuralOutput> outputs = new ArrayList<NeuralOutput>();
 	
 	public AverageNeuron(ActivationFunction activationFunction){
 		this.activationFunction = activationFunction;
@@ -48,23 +50,19 @@ public class AverageNeuron implements Neuron, Serializable {
 	}
 
 	public void addInput(NeuralInput input) {
-		// TODO Auto-generated method stub
-		
+		this.inputs.add(input);
 	}
 
 	public void addOutput(NeuralOutput output) {
-		// TODO Auto-generated method stub
-		
+		this.outputs.add(output);
 	}
 
 	public List<NeuralInput> getInputs() {
-		// TODO Auto-generated method stub
-		return null;
+		return this.inputs;
 	}
 
 	public List<NeuralOutput> getOutputs() {
-		// TODO Auto-generated method stub
-		return null;
+		return this.outputs;
 	}
 
 }
