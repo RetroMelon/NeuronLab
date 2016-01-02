@@ -10,7 +10,7 @@ public class WeightedSynapse extends Synapse {
 	
 	public WeightedSynapse() {}
 
-	public WeightedSynapse(int weight) {
+	public WeightedSynapse(double weight) {
 		this.weight = weight;
 	}
 	

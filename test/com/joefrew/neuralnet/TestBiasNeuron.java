@@ -4,41 +4,39 @@ import com.joefrew.neuralnet.activationfunction.ActivationFunction;
 
 import junit.framework.TestCase;
 
-public class TestAverageNeuron extends TestCase {
-
-	private Neuron neuron;
+public class TestBiasNeuron extends TestCase {
+	
+	private BiasNeuron neuron;
 	private ActivationFunction act;
 	
 	protected void setUp() throws Exception {
 		super.setUp();
 		
 		act = new DummyActivationFunction();
-		neuron = new AverageNeuron(act);
+		neuron = new BiasNeuron(act, 0);
 	}
 
 	protected void tearDown() throws Exception {
 		super.tearDown();
 	}
 	
-	public void testValue0() {
-		assertEquals(neuron.getValue(), 0, 0);
-	}
-	
-
-	
-	public void testAddingInputsAndOutputs() {
+	public void testActivationWithNoInputs() {
 		
-		DummyInput input = new DummyInput(1);
+		neuron.setBias(4);
+
 		DummyOutput output = new DummyOutput();
 		
-		neuron.addInput(input);
 		neuron.addOutput(output);
 		
-		assertTrue(neuron.getInputs().contains(input));
-		assertTrue(neuron.getOutputs().contains(output));
+		//activating the neuron to get the inputs, calculate and then pass it on to the outputs.
+		neuron.activate();
+		
+		assertEquals(4, output.getOutput(), 0);
 	}
 	
 	public void testSimpleActivation() {
+		
+		neuron.setBias(-7);
 		
 		DummyInput input = new DummyInput(1);
 		DummyInput input2 = new DummyInput(2);
@@ -51,7 +49,7 @@ public class TestAverageNeuron extends TestCase {
 		//activating the neuron to get the inputs, calculate and then pass it on to the outputs.
 		neuron.activate();
 		
-		assertEquals(3, output.getOutput(), 0);
+		assertEquals(-4, output.getOutput(), 0);
 	}
 
 }

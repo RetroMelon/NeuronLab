@@ -30,14 +30,17 @@ public interface Neuron {
 	
 	
 	/**
-	 * Get a list of all of the inputs.
+	 * Get a list of all of the inputs. Depending on the neuron implementation, this list
+	 * may be a clone or the original list. Therefore, this list cannot be changed with the expectation
+	 * that those changes will be present inside the neuron class.
 	 * @return A list of all of the NeuralInput objects.
 	 */
 	public List<NeuralInput> getInputs();
 
 	/**
-	 * Get a list of all of the inputs.
-	 * @return A list of all of the NeuralInput objects.
+	 * Get a list of all of the outputs. Like the getInputs() method, this method does not guarantee that the
+	 * list will be the same as the list inside the neuron class.
+	 * @return A list of all of the NeuralOutput objects.
 	 */
 	public List<NeuralOutput> getOutputs();
 	

@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.joefrew.neuralnet.activationfunct.ActivationFunction;
+import com.joefrew.neuralnet.activationfunction.ActivationFunction;
 
 
 /**
@@ -13,13 +13,9 @@ import com.joefrew.neuralnet.activationfunct.ActivationFunction;
  * @author joe
  *
  */
-public class AverageNeuron implements Neuron, Serializable {
+public class AverageNeuron extends BaseNeuron {
 	
-	protected double value = 0;
 	protected ActivationFunction activationFunction;
-	
-	protected List<NeuralInput> inputs = new ArrayList<NeuralInput>();
-	protected List<NeuralOutput> outputs = new ArrayList<NeuralOutput>();
 	
 	public AverageNeuron(ActivationFunction activationFunction){
 		this.activationFunction = activationFunction;
@@ -40,29 +36,6 @@ public class AverageNeuron implements Neuron, Serializable {
 		for (NeuralOutput out : this.getOutputs()) {
 			out.setOutput(this.value);
 		}		
-	}
-
-	/**
-	 * Gets the last value which was produced when the neuron was activated
-	 */
-	public double getValue() {
-		return value;
-	}
-
-	public void addInput(NeuralInput input) {
-		this.inputs.add(input);
-	}
-
-	public void addOutput(NeuralOutput output) {
-		this.outputs.add(output);
-	}
-
-	public List<NeuralInput> getInputs() {
-		return this.inputs;
-	}
-
-	public List<NeuralOutput> getOutputs() {
-		return this.outputs;
 	}
 
 }
