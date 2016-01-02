@@ -1,5 +1,7 @@
 package com.joefrew.neuralnet;
 
+import java.util.Random;
+
 import com.joefrew.neuralnet.activationfunction.ActivationFunction;
 
 /**
@@ -12,6 +14,10 @@ import com.joefrew.neuralnet.activationfunction.ActivationFunction;
 public class BiasNeuron extends AverageNeuron {
 	
 	BiasInput bias;
+	
+	public BiasNeuron(ActivationFunction activationFunction) {
+		this(activationFunction, (new Random()).nextGaussian()*2);
+	}
 	
 	public BiasNeuron(ActivationFunction activationFunction, double bias) {
 		super(activationFunction);

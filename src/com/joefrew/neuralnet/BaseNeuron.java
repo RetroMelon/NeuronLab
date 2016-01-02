@@ -8,12 +8,11 @@ import com.joefrew.neuralnet.activationfunction.ActivationFunction;
 
 
 /**
- * The BaseNeuron is a very simple neuron which averages its inputs and provides them to an activation function before
- * outputting them.
+ * The BaseNeuron is a very simple class which provides basic functions for adding and removing inputs, etc.
  * @author joe
  *
  */
-public class BaseNeuron implements Neuron, Serializable {
+public abstract class BaseNeuron implements Neuron, Serializable {
 	
 	protected double value = 0;
 	
@@ -23,9 +22,7 @@ public class BaseNeuron implements Neuron, Serializable {
 	/**
 	 * The activate function for the base neuron does nothing
 	 */
-	public void activate() {
-		
-	}
+	public abstract void activate();
 
 	/**
 	 * Gets the last value which was produced when the neuron was activated

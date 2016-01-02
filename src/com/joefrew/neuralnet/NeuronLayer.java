@@ -8,13 +8,18 @@ import java.util.Random;
 /**
  * The neuronlayer is really just a container for neurons. It doesn't really know what inputs and outputs the layers have.
  * It contains some useful static convenience functions like .connect(layer1, layer2) which will fully connect two layers
- * with random weighted synapses.
+ * with random weighted synapses. This class currently requires a type which extends BaseNeuron.
+ * This should ideally be implements Neuron instead.
  * @author joe
  *
  */
-public class NeuronLayer<T> implements Serializable {
+public class NeuronLayer<T extends BaseNeuron> implements Serializable {
 	
 	List<T> neurons = new ArrayList<T>();
+	
+	public int size(){
+		return neurons.size();
+	}
 	
 	public void addNeuron(T neuron) {
 		neurons.add(neuron);
@@ -24,12 +29,21 @@ public class NeuronLayer<T> implements Serializable {
 		return neurons;
 	}
 	
+	/**
+	 * iterates over each neuron in the array and activates it.
+	 */
+	public void activate() {
+		for (T n : this.neurons) {
+			n.activate();
+		}
+	}
+	
 	//for now this function will create random weighted synapses between the two layers
-	public static void connect(NeuronLayer<Neuron> layer1, NeuronLayer<Neuron> layer2) {
+	public static <C extends BaseNeuron> void connect(NeuronLayer<C> layer1, NeuronLayer<C> layer2) {
 		Random random = new Random();
 		
-		for (Neuron out : layer1.getNeurons()) {
-			for (Neuron in : layer2.getNeurons()) {
+		for (C out : layer1.getNeurons()) {
+			for (C in : layer2.getNeurons()) {
 				WeightedSynapse s = new WeightedSynapse(random.nextGaussian() * 2);
 				out.addOutput(s);
 				in.addInput(s);
