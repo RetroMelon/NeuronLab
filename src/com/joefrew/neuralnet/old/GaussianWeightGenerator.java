@@ -1,4 +1,4 @@
-package com.joefrew.neuralnet;
+package com.joefrew.neuralnet.old;
 
 import java.util.Random;
 

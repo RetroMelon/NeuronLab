@@ -1,4 +1,4 @@
-package com.joefrew.neuralnet;
+package com.joefrew.neuralnet.old;
 
 /**
  * The weight generator is a class that generates weights for a weighted synapse

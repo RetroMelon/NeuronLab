@@ -1,4 +1,4 @@
-package com.joefrew.neuralnet.activationfunction;
+package com.joefrew.neuralnet.old.activationfunction;
 
 import java.io.Serializable;
 

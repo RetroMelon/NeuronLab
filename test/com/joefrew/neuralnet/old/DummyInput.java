@@ -1,4 +1,6 @@
-package com.joefrew.neuralnet;
+package com.joefrew.neuralnet.old;
+
+import com.joefrew.neuralnet.old.NeuralInput;
 
 /**
  * The dummy neural input simply forwards the input it was given in the constructor.

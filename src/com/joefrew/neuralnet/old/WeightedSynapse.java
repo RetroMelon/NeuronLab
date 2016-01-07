@@ -1,6 +1,6 @@
-package com.joefrew.neuralnet;
+package com.joefrew.neuralnet.old;
 
-public class WeightedSynapse extends Synapse {
+public class WeightedSynapse extends Synapse implements Weighted {
 	
 	/**
 	 * The weighted synapse is the same as a normal synapse, but multiplies its input by the stored weight value.

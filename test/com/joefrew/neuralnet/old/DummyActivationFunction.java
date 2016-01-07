@@ -1,6 +1,6 @@
-package com.joefrew.neuralnet;
+package com.joefrew.neuralnet.old;
 
-import com.joefrew.neuralnet.activationfunction.ActivationFunction;
+import com.joefrew.neuralnet.old.activationfunction.ActivationFunction;
 
 /**
  * This dummy activation function simply forwards the input over to the output.

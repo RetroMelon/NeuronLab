@@ -1,4 +1,6 @@
-package com.joefrew.neuralnet;
+package com.joefrew.neuralnet.old;
+
+import com.joefrew.neuralnet.old.Synapse;
 
 import junit.framework.TestCase;
 

@@ -1,8 +1,8 @@
-package com.joefrew.neuralnet;
+package com.joefrew.neuralnet.old;
 
 import java.util.Random;
 
-import com.joefrew.neuralnet.activationfunction.ActivationFunction;
+import com.joefrew.neuralnet.old.activationfunction.ActivationFunction;
 
 /**
  * The bias neuron is an average neuron which also contains a bias factor. This bias
@@ -26,12 +26,23 @@ public class BiasNeuron extends AverageNeuron {
 		this.addInput(this.bias);
 	}
 	
+	public BiasNeuron(BiasNeuron biasNeuron) {
+		this(biasNeuron.getActivationFunction(), biasNeuron.getBias());
+	}
+
 	public double getBias() {
 		return bias.getInput();
 	}
 	
 	public void setBias(double bias) {
-		this.bias.setBias(bias);
+		this.bias.setWeight(bias);
 	}
+
+	@Override
+	public Neuron copy() {
+		return new BiasNeuron(this);
+	}
+	
+	
 	
 }

@@ -1,10 +1,10 @@
-package com.joefrew.neuralnet;
+package com.joefrew.neuralnet.old;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.joefrew.neuralnet.activationfunction.ActivationFunction;
+import com.joefrew.neuralnet.old.activationfunction.ActivationFunction;
 
 
 /**
@@ -12,7 +12,7 @@ import com.joefrew.neuralnet.activationfunction.ActivationFunction;
  * @author joe
  *
  */
-public abstract class BaseNeuron implements Neuron, Serializable {
+public abstract class BaseNeuron implements Neuron, Serializable, Cloneable {
 	
 	protected double value = 0;
 	
@@ -46,5 +46,8 @@ public abstract class BaseNeuron implements Neuron, Serializable {
 	public List<NeuralOutput> getOutputs() {
 		return this.outputs;
 	}
-
+	
+	public abstract Neuron copy();
+	
+	
 }

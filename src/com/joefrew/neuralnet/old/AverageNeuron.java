@@ -1,10 +1,10 @@
-package com.joefrew.neuralnet;
+package com.joefrew.neuralnet.old;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.joefrew.neuralnet.activationfunction.ActivationFunction;
+import com.joefrew.neuralnet.old.activationfunction.ActivationFunction;
 
 
 /**
@@ -19,6 +19,10 @@ public class AverageNeuron extends BaseNeuron {
 	
 	public AverageNeuron(ActivationFunction activationFunction){
 		this.activationFunction = activationFunction;
+	}
+
+	public AverageNeuron(AverageNeuron averageNeuron) {
+		this.activationFunction = averageNeuron.getActivationFunction();
 	}
 
 	/**
@@ -36,6 +40,15 @@ public class AverageNeuron extends BaseNeuron {
 		for (NeuralOutput out : this.getOutputs()) {
 			out.setOutput(this.value);
 		}		
+	}
+	
+	public ActivationFunction getActivationFunction() {
+		return this.activationFunction;
+	}
+
+	@Override
+	public Neuron copy() {
+		return new AverageNeuron(this);
 	}
 
 }

@@ -1,4 +1,4 @@
-package com.joefrew.neuralnet.activationfunction;
+package com.joefrew.neuralnet.old.activationfunction;
 
 public interface ActivationFunction {
 	

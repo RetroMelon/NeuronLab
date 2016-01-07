@@ -1,4 +1,4 @@
-package com.joefrew.neuralnet;
+package com.joefrew.neuralnet.old;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -38,16 +38,47 @@ public class NeuronLayer<T extends BaseNeuron> implements Serializable {
 		}
 	}
 	
-	//for now this function will create random weighted synapses between the two layers
+	public NeuronLayer<T> copy() {
+		NeuronLayer<T> newLayer = new NeuronLayer<T>();
+		
+		for (BaseNeuron neuron : neurons) {
+			newLayer.addNeuron((T) neuron.copy());
+		}
+		
+		return newLayer;
+	}
+	
+	/**
+	 * Connects two NeuronLayers with all 1 weighted synapses.
+	 * @param layer1
+	 * @param layer2
+	 */
 	public static <C extends BaseNeuron> void connect(NeuronLayer<C> layer1, NeuronLayer<C> layer2) {
-		Random random = new Random();
 		
 		for (C out : layer1.getNeurons()) {
 			for (C in : layer2.getNeurons()) {
-				WeightedSynapse s = new WeightedSynapse(random.nextGaussian() * 2);
+				WeightedSynapse s = new WeightedSynapse(1);
 				out.addOutput(s);
 				in.addInput(s);
 			}
 		}
-	}	
+	}
+	
+	/**
+	 * Connects two layers with weighted synapses whose weights can be decided by passing a WeightGenerator object
+	 * @param layer1
+	 * @param layer2
+	 * @param weightGenerator An object whose nextWeight function will supply a double to be used as a weight.
+	 */
+	public static <C extends BaseNeuron> void connectWeighted(NeuronLayer<C> layer1, NeuronLayer<C> layer2, WeightGenerator weightGenerator) {
+		connect(layer1, layer2);
+		
+		for (BaseNeuron neuron : layer2.getNeurons()) {
+			for (NeuralInput input : neuron.getInputs()) {
+				if (input instanceof Weighted) {
+					((Weighted) input).setWeight(weightGenerator.nextWeight());
+				}
+			}
+		}
+	}
 }

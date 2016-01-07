@@ -1,4 +1,4 @@
-package com.joefrew.neuralnet;
+package com.joefrew.neuralnet.old;
 
 public class InputNeuron extends BaseNeuron {
 
@@ -14,6 +14,11 @@ public class InputNeuron extends BaseNeuron {
 	
 	public void setValue(double value) {
 		this.value = value;
+	}
+
+	@Override
+	public Neuron copy() {
+		return new InputNeuron();
 	}
 
 }

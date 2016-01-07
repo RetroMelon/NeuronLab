@@ -1,9 +1,9 @@
-package com.joefrew.neuralnet;
+package com.joefrew.neuralnet.old;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import com.joefrew.neuralnet.activationfunction.SigmoidFunction;
+import com.joefrew.neuralnet.old.activationfunction.SigmoidFunction;
 
 
 /**
@@ -54,6 +54,10 @@ public class ConnectedNetwork implements NeuralNetwork {
 		
 		
 	}
+	
+	public ConnectedNetwork(List<NeuronLayer> layers) {
+		this.layers = layers;
+	}
 
 	public int size() {
 		return layers.size();
@@ -61,6 +65,10 @@ public class ConnectedNetwork implements NeuralNetwork {
 
 	public List<NeuronLayer> getLayers() {
 		return layers;
+	}
+	
+	public void setLayers(List<NeuronLayer> layers) {
+		this.layers = layers;
 	}
 
 	public double[] activate() {
@@ -79,6 +87,28 @@ public class ConnectedNetwork implements NeuralNetwork {
 		}
 		
 		return results;
+	}
+	
+	public ConnectedNetwork copy() {
+		List<NeuronLayer> newLayers = new ArrayList<NeuronLayer>();
+		
+		//copying all of the current layers in to the new set of layers
+		for (NeuronLayer layer : layers) {
+			NeuronLayer copyLayer = layer.copy();
+			
+			//if there's another layer in the newLayers, then connect the newly copied one to it
+			//before adding to the list
+			if (newLayers.size() > 0) {
+				WeightGenerator weightGenerator = new CopyWeightGenerator(layer);
+				NeuronLayer.connectWeighted(newLayers.get(newLayers.size()-1), copyLayer, weightGenerator);
+			}
+			
+			newLayers.add(layer.copy());
+			
+		}
+		
+		ConnectedNetwork newNetwork = new ConnectedNetwork(newLayers);
+		return newNetwork;
 	}
 
 }

@@ -1,8 +1,8 @@
-package com.joefrew.neuralnet;
+package com.joefrew.neuralnet.old;
 
 import java.io.Serializable;
 
-class Synapse implements NeuralInput, NeuralOutput, Serializable {
+public class Synapse implements NeuralInput, NeuralOutput, Serializable {
 	
 	protected double value = 0;
 	
