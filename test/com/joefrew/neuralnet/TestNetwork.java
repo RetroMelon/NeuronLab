@@ -7,35 +7,27 @@ import java.util.List;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
 
-@RunWith(Suite.class)
-@SuiteClasses({})
 public class TestNetwork {
-	
+
 	@Before
-	public void setup() {
-		
+	public void setUp() throws Exception {
 	}
 
 	@After
-	public void tearDown() {
-		
+	public void tearDown() throws Exception {
 	}
-	
-	/**
-	 * Tests that the synapse layers are generated correctly when there is only 2 layers.
-	 */
+
 	@Test
 	public void testSynapseLayerGeneration2Layer() {
 		Network network = new Network(2, 3);
 		
 		List<double[]> synapseLayers = network.getSynapseLayers();
 		
+		//asserting that there are the right number of synapse layers.
 		assertEquals(synapseLayers.size(), 1);
 		
+		//asserting that the synapse layer is of the right size.
 		assertEquals(synapseLayers.get(0).length, (2 + 1) * 3);
 	}
 
