@@ -30,5 +30,22 @@ public class TestNetwork {
 		//asserting that the synapse layer is of the right size.
 		assertEquals(synapseLayers.get(0).length, (2 + 1) * 3);
 	}
+	
+
+	@Test
+	public void testSynapseLayerGeneration3Layer() {
+		Network network = new Network(2, 3, 3);
+		
+		List<double[]> synapseLayers = network.getSynapseLayers();
+		
+		//asserting that there are the right number of synapse layers.
+		assertEquals(synapseLayers.size(), 2);
+		
+		//asserting that the synapse layer is of the right size.
+		assertEquals(synapseLayers.get(0).length, (2 + 1) * 3);
+		
+		//asserting that the synapse layer is of the right size.
+		assertEquals(synapseLayers.get(1).length, (3 + 1) * 3);
+	}
 
 }

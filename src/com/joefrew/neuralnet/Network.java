@@ -9,6 +9,9 @@ public class Network {
 	
 	private List<double[]> synapseLayers = new ArrayList<double[]>();
 	
+	private ActivationFunction activation;
+	private TransferFunction transfer;
+	
 	public Network(int... topology) {
 		//TODO: range check to make sure that topology is at least 2 layers and all are > 0.
 		
@@ -25,8 +28,13 @@ public class Network {
 			synapseLayers.add(new double[previousLayerSize * layerSize]);
 		}
 		
+		this.activation = new SigmoidActivationFunction();
+		this.transfer = new AverageTransferFunction();
+		
 	}
 	
+	//TODO: make a constructor that supports different activation and transfer functions.
+
 	public double[] activate(double[] input) {
 		return null;
 	}
