@@ -6,12 +6,15 @@ import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.image.BufferStrategy;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
+import com.joefrew.neuralnet.BiasNetwork;
+import com.joefrew.neuralnet.genetics.Mutator;
 import com.joefrew.neuronlab.Experiment;
 
 public class FishExperiment implements Experiment {
@@ -45,8 +48,18 @@ public class FishExperiment implements Experiment {
 	public void run() throws Exception {
 		this.display = new FishExperimentDisplay(this.world.width, this.world.height);
 		
-		world.fish.add(new Fish());
+		//setting up a fish brain
+		BiasNetwork network = new BiasNetwork(2, 2, 2);
+		Mutator mutator = new Mutator();
 		
+		double[] mutatedGenome = mutator.mutate(network.getGenome(), 1, 5, 5);
+				
+		System.out.println(Arrays.toString(mutatedGenome));
+		
+		network.setGenome(mutatedGenome);
+		
+		
+		world.fish.add(new Fish(network, 100, 100));
 		running = true;
 		while(running) {
 			//checking if we are due to perform another sim tick
@@ -62,8 +75,6 @@ public class FishExperiment implements Experiment {
 				render();
 			}
 		}
-		
-		
 	}
 	
 	private void simTick() {

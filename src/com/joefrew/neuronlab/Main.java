@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import java.util.List;
 
 
+import com.joefrew.neuralnet.BiasNetwork;
 import com.joefrew.neuralnet.genetics.Combiner;
 import com.joefrew.neuralnet.genetics.DummyRandom;
 import com.joefrew.neuralnet.old.ConnectedNetwork;
@@ -19,6 +20,10 @@ public class Main {
 	 * @throws Exception 
 	 */
 	public static void main(String[] args) throws Exception {
+		BiasNetwork network = new BiasNetwork();
+		
+		
+		
 		new FishExperiment().run();
 	}
 

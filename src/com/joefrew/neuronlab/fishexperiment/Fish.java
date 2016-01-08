@@ -3,9 +3,14 @@ package com.joefrew.neuronlab.fishexperiment;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.geom.Point2D;
+import java.util.Arrays;
 import java.util.List;
 
+import com.joefrew.neuralnet.BiasNetwork;
+
 public class Fish implements ExperimentRenderable {
+	
+	BiasNetwork brain;
 
 	double x = 300;
 	double y = 300;
@@ -26,6 +31,12 @@ public class Fish implements ExperimentRenderable {
 	
 	int foodEaten = 0;
 	
+	public Fish(BiasNetwork brain, double x, double y) {
+		this.brain = brain;
+		this.x = x;
+		this.y = y;
+	}
+	
 	public void render(Graphics2D g) {
 		//drawing body
 		g.setColor(Color.RED);
@@ -41,17 +52,89 @@ public class Fish implements ExperimentRenderable {
 		g.fillOval((int)(eye2Location.getX() - eyeSize), (int)(eye2Location.getY() - eyeSize), (int)(eyeSize * 2), (int)(eyeSize * 2));
 	}
 	
-	//update is responsible for sensing, doing brain activity and moving.
+	/**
+	 * Sense, perform brain function, move and collide.
+	 * @param world
+	 */
 	public void update(World world) {
-		//sense
-		//brain
-		double[] brainOutputs = {1, -1};
+		double[] brainInputs = sense(world);
 		
-		this.speed = brainOutputs[0] * maxSpeed;
-		this.rotationSpeed = brainOutputs[1] * maxRotationSpeed;
+		System.out.println("\t\t" + Arrays.toString(brainInputs));
+		
+		double[] brainOutputs = brain(brainInputs);
+		
+		System.out.println(Arrays.toString(brainOutputs));
+		
+		if (brainOutputs != null) {
+			this.speed = brainOutputs[0] * maxSpeed;
+			this.rotationSpeed = brainOutputs[1] * maxRotationSpeed;
+			
+			if (speed > maxSpeed) {
+				speed = maxSpeed;
+			} else if (speed < -maxSpeed) {
+				speed = -maxSpeed;
+			}
+			
+			if (rotationSpeed > maxRotationSpeed) {
+				rotationSpeed = maxRotationSpeed;
+			} else if (rotationSpeed < -maxRotationSpeed) {
+				rotationSpeed = -maxRotationSpeed;
+			}
+		}
 		
 		move(world);
 		collide(world);
+	}
+	
+	/**
+	 * sense detects the closes piece of food to the fish, then gets the distance from each of the eyes to the piece of food.
+	 * 
+	 * @return a pair of double values which are the distances between each eye and the food. If there is no food, the distances are maxValue.
+	 */
+	public double[] sense(World world) {
+		Food closestFood = null;
+		int closestDistance = Integer.MAX_VALUE;
+		
+		//finding the closes piece of food
+		for (Food food : world.food) {
+			int differenceX = (int)this.x - (int)food.getX();
+			int differenceY = (int)this.y - (int)food.getY();
+			
+			int distance = (int)Math.sqrt((differenceX*differenceX)+(differenceY*differenceY));
+			
+			if (distance < closestDistance) {
+				closestFood = food;
+				closestDistance = distance;
+			}
+		}
+		
+		//if there was no piece of food to detect, return max_values
+		if (closestFood == null) {
+			return new double[]{Double.MAX_VALUE, Double.MAX_VALUE};
+		}
+		
+		//we now have the closest piece of food, so finding the distance between it and the two eyes
+		Point2D eye0Location = this.getEyeLocation(0);
+		int differenceX = (int)eye0Location.getX() - (int)closestFood.getX();
+		int differenceY = (int)eye0Location.getY() - (int)closestFood.getY();
+		
+		int distanceEye0 = (int)Math.sqrt((differenceX*differenceX)+(differenceY*differenceY));
+		
+		Point2D eye1Location = this.getEyeLocation(1);
+		differenceX = (int)eye1Location.getX() - (int)closestFood.getX();
+		differenceY = (int)eye1Location.getY() - (int)closestFood.getY();
+		
+		int distanceEye1 = (int)Math.sqrt((differenceX*differenceX)+(differenceY*differenceY));
+		
+		return new double[]{distanceEye0, distanceEye1};
+	}
+	
+	public double[] brain(double[] input) {
+		try {
+			return this.brain.activate(input);			
+		} catch (Exception e) {
+			return null;
+		}
 	}
 
 	public void move(World world) {
