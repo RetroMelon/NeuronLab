@@ -7,8 +7,10 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.joefrew.neuralnet.BiasNetwork;
+import com.joefrew.neuralnet.genetics.Genomic;
+import com.joefrew.neuralnet.genetics.Scorable;
 
-public class Fish implements ExperimentRenderable {
+public class Fish implements ExperimentRenderable, Genomic, Scorable {
 	
 	BiasNetwork brain;
 
@@ -30,6 +32,7 @@ public class Fish implements ExperimentRenderable {
 	double rotationSpeed = 0;
 	
 	int foodEaten = 0;
+	Food currentFood = null;
 	
 	public Fish(BiasNetwork brain, double x, double y) {
 		this.brain = brain;
@@ -42,13 +45,23 @@ public class Fish implements ExperimentRenderable {
 		g.setColor(Color.RED);
 		g.fillOval((int)(x-size), (int)(y-size), (int)(size * 2), (int)(size * 2));
 		
+
+		
+		Point2D eye1Location = this.getEyeLocation(0);
+		Point2D eye2Location = this.getEyeLocation(1);
+		
+		if (this.currentFood != null) {			
+			//drawing lines to the food is there is any
+			g.setColor(Color.YELLOW);
+			
+			g.drawLine((int)(eye1Location.getX()), (int)(eye1Location.getY()), (int)(currentFood.getX()), (int)(currentFood.getY()));
+			g.drawLine((int)(eye2Location.getX()), (int)(eye2Location.getY()), (int)(currentFood.getX()), (int)(currentFood.getY()));
+		}
+		
 		//drawing eyes
 		g.setColor(Color.BLUE);
 		
-		Point2D eye1Location = this.getEyeLocation(0);
 		g.fillOval((int)(eye1Location.getX() - eyeSize), (int)(eye1Location.getY() - eyeSize), (int)(eyeSize * 2), (int)(eyeSize * 2));
-		
-		Point2D eye2Location = this.getEyeLocation(1);
 		g.fillOval((int)(eye2Location.getX() - eyeSize), (int)(eye2Location.getY() - eyeSize), (int)(eyeSize * 2), (int)(eyeSize * 2));
 	}
 	
@@ -111,6 +124,8 @@ public class Fish implements ExperimentRenderable {
 		//if there was no piece of food to detect, return max_values
 		if (closestFood == null) {
 			return new double[]{Double.MAX_VALUE, Double.MAX_VALUE};
+		} else {
+			this.currentFood = closestFood;
 		}
 		
 		//we now have the closest piece of food, so finding the distance between it and the two eyes
@@ -197,6 +212,22 @@ public class Fish implements ExperimentRenderable {
 		double eyey = y - Math.cos(angle) * eyeDistance;
 		
 		return new Point2D.Double(eyex, eyey);
+	}
+
+	public double getScore() {
+		return this.foodEaten;
+	}
+
+	public double[] getGenome() {
+		return this.brain.getGenome();
+	}
+
+	public void setGenome(double[] genome) {
+		try {
+			this.brain.setGenome(genome);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}		
 	}
 
 }

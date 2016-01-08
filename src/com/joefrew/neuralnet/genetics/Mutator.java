@@ -13,6 +13,20 @@ import java.util.Random;
 public class Mutator {
 	
 	private Random random = new Random();
+	
+	double mutationRatio = 0.2;
+	double mutationMean = 5;
+	double mutationDeviation = 5;
+	
+	public Mutator(double mutationRatio, double mutationMean, double mutationDeviation) {
+		this.mutationRatio = mutationRatio;
+		this.mutationMean = mutationMean;
+		this.mutationDeviation = mutationDeviation;
+	}
+	
+	public double[] mutate(double[] genome) {
+		return this.mutate(genome, mutationRatio, mutationMean, mutationDeviation);
+	}
 
 	public double[] mutate(double[] genome, double mutationRatio, double mutationMean, double mutationDeviation) {
 		for (int i = 0; i < genome.length; i++) {

@@ -22,11 +22,10 @@ public class FishExperiment implements Experiment {
 	World world = new World();
 	
 	FishExperimentDisplay display;
-	
-	Random random = new Random();
+	FishSimulation simulation;
 	
 	//the preferred number of simulation ticks per second
-	int preferredSimTicks = 100;
+	int preferredSimTicks = 1000;
 	int nanosPerSimTick = (1000 * 1000 * 1000) / preferredSimTicks;
 	
 	//the preferred frame rate per second and the number of milliseconds per frame
@@ -43,10 +42,31 @@ public class FishExperiment implements Experiment {
 	boolean running = false;
 	
 	//food will spawn about once every 500 simulation ticks
-	double foodSpawnChance = 1/100.0;
+	double foodSpawnChance = 1/1000.0;
 	
 	public void run() throws Exception {
+		//setting up the display
 		this.display = new FishExperimentDisplay(this.world.width, this.world.height);
+		this.simulation = new FishSimulation(this.world);
+		
+		//setting up an initial generation of fish
+		
+		//setting up a genetic algorithm to breed/mutate the generations
+		
+		
+		//while true, put the fish in a simulation and run it. then get a new generation from the genetic algorithm
+		//and run it in a new simulation
+		//while (true) {
+			//simulating the fish
+			//world.fish = currentGeneration.getFish();
+			//world.food.clear();
+		
+			//runSimulation();
+		
+			//getting a new generation from the genetic algorithm
+			//currentGeneration = geneticAlgorithm.newGeneration(currentGeneration);
+		//}
+		
 		
 		//setting up a fish brain
 		BiasNetwork network = new BiasNetwork(2, 2, 2);
@@ -78,27 +98,7 @@ public class FishExperiment implements Experiment {
 	}
 	
 	private void simTick() {
-		currentSimTick++;
-
-		//spawning food if we haven't had one in a while.
-		if (random.nextDouble() < foodSpawnChance) {
-			world.food.add(new Food(random.nextDouble()*world.width, random.nextDouble()*world.height));
-		}
-		
-		//updating all of the fish
-		for (Fish fish : world.fish) {
-			fish.update(world);
-		}
-		
-		//removing any eaten food from the world.
-		List<Food> eatenFood = new ArrayList<Food>();
-		for (Food food : world.food) {
-			if (food.isEaten()) {
-				eatenFood.add(food);
-			}
-		}
-		
-		world.food.removeAll(eatenFood);
+		this.simulation.tick();
 	}
 	
 	private void render() {

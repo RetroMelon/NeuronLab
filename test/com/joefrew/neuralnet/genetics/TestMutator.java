@@ -19,7 +19,7 @@ public class TestMutator {
 	@Test
 	public void testCorrectNumberOfMutatedGenes() {
 		//setting up a combiner and replacing its random generator with a dummy
-		Mutator mutator = new Mutator();
+		Mutator mutator = new Mutator(0.4, 1.0, 1.0);
 		mutator.setRandom(new DummyRandom(0.7, 0, true));
 		
 		double[] genome1 = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
