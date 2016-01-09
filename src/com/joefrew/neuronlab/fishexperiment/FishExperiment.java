@@ -38,11 +38,11 @@ public class FishExperiment implements Experiment {
 	
 	//the preferred number of simulation ticks per second
 	int preferredSimTicks = 1000;
-	int nanosPerSimTick = (1000 * 1000 * 1000) / preferredSimTicks;
+	long nanosPerSimTick = (1000 * 1000 * 1000) / preferredSimTicks;
 	
 	//the preferred frame rate per second and the number of milliseconds per frame
 	int preferredFrameRate = 100;
-	int nanosPerFrame = (1000 * 1000 * 1000)/preferredFrameRate;
+	long nanosPerFrame = (1000 * 1000 * 1000)/preferredFrameRate;
 
 	long currentFrame = 0;
 	
@@ -50,13 +50,18 @@ public class FishExperiment implements Experiment {
 	long lastSimTick = 0;
 	long lastFrame = 0;
 	
+	//whether the experiment has finished or is still in progress.
 	boolean running = false;
+	
+	//whether the experiment has been temporarily paused.
+	boolean paused = false;
+	int lastPreferredSimTicks = 0; //the last preferred sim ticks before the sim was paused.
 	
 	int currentGeneration = 1;
 	
 	public void run() throws Exception {
 		//setting up the display
-		this.display = new FishExperimentDisplay(this.world.width, this.world.height, this);
+		this.display = new FishExperimentDisplay(this);
 		
 		//setting up a genetic algorithm which will breed/mutate the generations
 		Mutator mutator = new Mutator(0.2, 0.2, 0.2);
@@ -134,7 +139,7 @@ public class FishExperiment implements Experiment {
 	private void render() {
 		currentFrame++;
 		
-		display.render(world);
+		display.render();
 	}
 
 	public World getWorld() {
@@ -151,7 +156,13 @@ public class FishExperiment implements Experiment {
 
 	public void setPreferredSimTicks(int preferredSimTicks) {
 		this.preferredSimTicks = preferredSimTicks;
-		this.nanosPerSimTick = (1000 * 1000 * 1000) / preferredSimTicks;
+		
+		if (this.preferredSimTicks <= 0) {
+			this.preferredSimTicks = 0;
+			this.nanosPerSimTick = Long.MAX_VALUE; //this will have the effect of pausing.
+		} else {
+			this.nanosPerSimTick = (1000 * 1000 * 1000) / preferredSimTicks;
+		}
 	}
 
 	public int getPreferredFrameRate() {
@@ -160,7 +171,13 @@ public class FishExperiment implements Experiment {
 
 	public void setPreferredFrameRate(int preferredFrameRate) {
 		this.preferredFrameRate = preferredFrameRate;
-		this.nanosPerFrame = (1000 * 1000 * 1000)/preferredFrameRate;
+		
+		if (this.preferredFrameRate <= 0) {
+			this.preferredFrameRate = 0;
+			this.nanosPerFrame = Long.MAX_VALUE;
+		} else {
+			this.nanosPerFrame = (1000 * 1000 * 1000)/preferredFrameRate;
+		}
 	}
 
 	public boolean isRunning() {
@@ -169,6 +186,28 @@ public class FishExperiment implements Experiment {
 
 	public void setRunning(boolean running) {
 		this.running = running;
+	}
+
+	public boolean isPaused() {
+		return paused;
+	}
+
+	public void setPaused(boolean paused) {
+		//if we're trying to set it to its current state then do nothing.
+		if (paused == this.paused) {
+			return;
+		}
+		
+		//if the current state is unpaused, then record the preferredsimtick rate and set it to zero.
+		if (!this.paused) {			
+			lastPreferredSimTicks = this.getPreferredSimTicks();
+			this.setPreferredSimTicks(0);
+			this.paused = true;
+		} else { //if current state is paused, then set the preferred sim ticks 
+			this.setPreferredSimTicks(lastPreferredSimTicks);
+			this.paused = false;
+		}
+		
 	}
 
 	public long getCurrentSimTick() {
