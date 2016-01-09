@@ -10,7 +10,7 @@ import com.joefrew.neuralnet.BiasNetwork;
 import com.joefrew.neuralnet.genetics.Genomic;
 import com.joefrew.neuralnet.genetics.Scorable;
 
-public class Fish implements ExperimentRenderable, Genomic, Scorable {
+public class Fish implements ExperimentRenderable, Genomic, Scorable, PointCollidable {
 	
 	BiasNetwork brain;
 
@@ -41,6 +41,11 @@ public class Fish implements ExperimentRenderable, Genomic, Scorable {
 	}
 	
 	public void render(Graphics2D g) {
+		this.render(g, 0);
+	}
+	
+
+	public void render(Graphics2D g, int debugLevel) {
 		//drawing body
 		g.setColor(Color.RED);
 		g.fillOval((int)(x-size), (int)(y-size), (int)(size * 2), (int)(size * 2));
@@ -50,7 +55,7 @@ public class Fish implements ExperimentRenderable, Genomic, Scorable {
 		Point2D eye1Location = this.getEyeLocation(0);
 		Point2D eye2Location = this.getEyeLocation(1);
 		
-		if (this.currentFood != null && !this.currentFood.isEaten()) {			
+		if (debugLevel >= 1 && this.currentFood != null && !this.currentFood.isEaten()) {			
 			//drawing lines to the food is there is any
 			g.setColor(Color.CYAN);
 			
@@ -62,7 +67,7 @@ public class Fish implements ExperimentRenderable, Genomic, Scorable {
 		g.setColor(Color.YELLOW);
 		
 		g.fillOval((int)(eye1Location.getX() - eyeSize), (int)(eye1Location.getY() - eyeSize), (int)(eyeSize * 2), (int)(eyeSize * 2));
-		g.fillOval((int)(eye2Location.getX() - eyeSize), (int)(eye2Location.getY() - eyeSize), (int)(eyeSize * 2), (int)(eyeSize * 2));
+		g.fillOval((int)(eye2Location.getX() - eyeSize), (int)(eye2Location.getY() - eyeSize), (int)(eyeSize * 2), (int)(eyeSize * 2));		
 	}
 	
 	/**
@@ -179,16 +184,20 @@ public class Fish implements ExperimentRenderable, Genomic, Scorable {
 				continue;
 			}
 			
-			int differenceX = (int)this.x - (int)food.getX();
-			int differenceY = (int)this.y - (int)food.getY();
-			
-			int distance = (int)Math.sqrt((differenceX*differenceX)+(differenceY*differenceY));
-			
-			if (distance <= collisionSize) {
+			if (this.pointCollision(food.getX(), food.getY())) {
 				foodEaten++;
 				food.setEaten(true);
 			}
 		}
+	}
+	
+	public boolean pointCollision(double x, double y) {
+		int differenceX = (int)this.x - (int)x;
+		int differenceY = (int)this.y - (int)y;
+		
+		int distance = (int)Math.sqrt((differenceX*differenceX)+(differenceY*differenceY));
+		
+		return distance <= this.collisionSize;
 	}
 	
 	/**
@@ -224,6 +233,34 @@ public class Fish implements ExperimentRenderable, Genomic, Scorable {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}		
+	}
+
+	public double getX() {
+		return x;
+	}
+
+	public void setX(double x) {
+		this.x = x;
+	}
+
+	public double getY() {
+		return y;
+	}
+
+	public void setY(double y) {
+		this.y = y;
+	}
+
+	public BiasNetwork getBrain() {
+		return brain;
+	}
+
+	public double getSpeed() {
+		return speed;
+	}
+
+	public int getFoodEaten() {
+		return foodEaten;
 	}
 
 }

@@ -17,6 +17,10 @@ public class Food implements ExperimentRenderable {
 	}
 
 	public void render(Graphics2D g) {
+		this.render(g, 0);
+	}
+	
+	public void render(Graphics2D g, int debugLevel) {
 		g.setColor(Color.GREEN);
 		
 		g.fillOval((int)(x-size), (int)(y-size), (int)(size * 2), (int)(size * 2));

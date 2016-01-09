@@ -6,6 +6,8 @@ import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.image.BufferStrategy;
 
 import javax.swing.JFrame;
@@ -18,13 +20,15 @@ import javax.swing.JPanel;
  * @author joe
  *
  */
-public class FishExperimentDisplay implements KeyListener {
+public class FishExperimentDisplay implements KeyListener, MouseListener {
 	
 	FishExperiment experiment;
 	
 	JFrame window;
 	Canvas canvas;
 	BufferStrategy buffer;
+	
+	Fish selectedFish = null;
 	
 	public FishExperimentDisplay (FishExperiment experiment) {
 		this.setExperiment(experiment);
@@ -56,10 +60,17 @@ public class FishExperimentDisplay implements KeyListener {
 	public void render() {
 		World world = this.experiment.getWorld();
 		
+		//we need to check that the selected fish is still actually in the world. if it is not, set it to null
+		if (selectedFish != null && !world.fish.contains(selectedFish)) {
+			selectedFish = null;
+		}
+		
 		//setting up the graphics object to be passed to the drawables.
 		Graphics2D g = (Graphics2D) buffer.getDrawGraphics();
 		g.setColor(Color.BLACK);
 	    g.clearRect(0, 0, world.width, world.height);
+	    
+	    
 	    
 	    //iterating over all of the food and passing the graphics object to them
 	    for (Food food : world.food) {
@@ -68,11 +79,27 @@ public class FishExperimentDisplay implements KeyListener {
 	    
 	    //iterating over all of the fish and passing the graphics object to them
 	    for (Fish fish : world.fish) {
-	    	fish.render(g);
+	    	if (fish == selectedFish) {	    		
+	    		fish.render(g, 1);
+	    	} else {
+	    		fish.render(g);
+	    	}
 	    }
 	    
+	    //if our selected fish is still in the world, draw a circle around it.
+	    if (selectedFish != null) {
+	    	g.setColor(Color.GREEN);
+	    	int size = 20;
+	    	int x = (int) selectedFish.getX();
+	    	int y = (int) selectedFish.getY();
+	    	g.drawOval(x - size, y - size, size * 2, size * 2);
+	    }
+	    
+	    
+	    //drawing the text
 	    g.setColor(Color.WHITE);
-	    //drawing the current tick and generation
+
+	    //current tick and generation
 	    g.drawString("" + experiment.getCurrentSimTick(), 10, 10);
 	    g.drawString("Generation: " + experiment.getCurrentGeneration(), world.width-150, 10);
 	    
@@ -115,8 +142,9 @@ public class FishExperimentDisplay implements KeyListener {
 		canvas.setBounds(0, 0, world.width, world.height);
 		canvas.setIgnoreRepaint(true);
 		
-		//adding this as a key listener to the canvas.
+		//adding this as a key and mouse lostener to the canvas
 		canvas.addKeyListener(this);
+		canvas.addMouseListener(this);
 		
 		panel.add(canvas);
 		
@@ -191,6 +219,53 @@ public class FishExperimentDisplay implements KeyListener {
 			this.shiftPressed = false;
 			break;
 		}	
+	}
+
+
+	public void mouseClicked(MouseEvent e) {
+		System.out.println("clicked: " + e);
+		
+	}
+
+
+	public void mousePressed(MouseEvent e) {
+		System.out.println("pressed: " + e);
+		if (e.getButton() == MouseEvent.BUTTON1) {
+			//checking each fish in the world for a collision
+			boolean collision = false;
+			
+			for (Fish fish : experiment.getWorld().fish) {
+				System.out.println("Checking for collision");
+				if (fish.pointCollision(e.getX(), e.getY())) {
+					collision = true;
+					this.selectedFish = fish; 
+					break;
+				}
+			}
+			
+			//no fish collided so setting selectedFish to null
+			if (!collision) {				
+				selectedFish = null;
+			}
+		}
+	}
+
+
+	public void mouseReleased(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	public void mouseEntered(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	public void mouseExited(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
 	}
 	
 

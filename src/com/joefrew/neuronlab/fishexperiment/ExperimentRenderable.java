@@ -9,5 +9,7 @@ public interface ExperimentRenderable {
 	 * @param g
 	 */
 	public void render(Graphics2D g);
+	
+	public void render(Graphics2D g, int debugLevel);
 
 }
