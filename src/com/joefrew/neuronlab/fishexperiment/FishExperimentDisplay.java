@@ -36,6 +36,9 @@ public class FishExperimentDisplay implements KeyListener, MouseListener {
 	
 	Fish selectedFish = null;
 	
+	int controlPanelWidth = 200;
+	int inspectorHeight = 250;
+	
 	public FishExperimentDisplay (FishExperiment experiment) {
 		this.setExperiment(experiment);
 		this.setupWindow();
@@ -131,25 +134,39 @@ public class FishExperimentDisplay implements KeyListener, MouseListener {
 	
 	private void renderInspector() {
 		World world = this.experiment.getWorld();
+		Color textColor = Color.WHITE;
+		int textMargin = 10;
 		
 		Graphics2D g = (Graphics2D) inspectorBuffer.getDrawGraphics();
 	    g.clearRect(0, 0, world.width, world.height);
 		
 	    
 	    if (this.selectedFish == null) {
-	    	g.setColor(Color.WHITE);
-	    	g.drawString("No fish selected.", 10, 15);
+	    	g.setColor(textColor);
+	    	g.drawString("No fish selected.", textMargin, 15);
 	    } else {
 	    	//drawing some basic text about the fish
 	    	int lineOffset = 15;
 	    	int currentLine = lineOffset;
-	    	g.setColor(Color.WHITE);
+	    	g.setColor(textColor);
 	    	
-	    	g.drawString("Food Eaten: " + selectedFish.getFoodEaten(), 10,  currentLine);
+	    	g.drawString("Food Eaten: " + selectedFish.getFoodEaten(), textMargin,  currentLine);
 	    	currentLine += lineOffset;
 	    	
-	    	g.drawString("Brain Topology: " + Arrays.toString(selectedFish.getBrain().getTopology()), 10,  currentLine);
+	    	g.drawString("Brain Topology: " + Arrays.toString(selectedFish.getBrain().getTopology()), textMargin,  currentLine);
 	    	currentLine += lineOffset;	    	
+	    	
+	    	g.drawString("Genome: ", textMargin,  currentLine);
+	    	currentLine += lineOffset;	
+	    	
+	    	//rendering the genome as a series of black and white boxes
+	    	//getting the genome, finding the highest and smallest, and then scaling the whiteness factor appropriately
+	    	int margin = 10;
+	    	renderGenome(g, selectedFish.getGenome(), textMargin, currentLine-10, controlPanelWidth-textMargin*2, 10);
+	    	currentLine += lineOffset;
+	    	
+	    	
+	    	//render the neuron values in the brain
 	    	
 	    }
 	    
@@ -160,11 +177,33 @@ public class FishExperimentDisplay implements KeyListener, MouseListener {
 	    inspectorBuffer.show();
 	}
 	
+	private void renderGenome(Graphics2D g, double[] genome, int startX, int startY, int maxX, int maxY) {
+    	double highest = Double.MIN_VALUE;
+    	double smallest = Double.MAX_VALUE;
+    	for (double gene : genome) {
+    		if (gene > highest) {highest = gene;}
+    		if (gene < smallest) {smallest = gene;}
+    	}
+    	
+    	double range = highest - smallest;
+    	int[] colors = new int[genome.length];
+    	for (int i = 0; i < genome.length; i++) {
+    		double gene = genome[i];
+    		colors[i] = (int)(255 * ((gene - smallest)/range));
+    	}
+    	
+    	//number of pixels margin for the genome
+    	int pixelsPerColor = (maxX)/colors.length;
+    	int blockHeight = (pixelsPerColor >= maxY || pixelsPerColor <= 5?maxY:pixelsPerColor);
+    	for (int i = 0; i < colors.length; i++) {
+    		int color = colors[i];
+    		g.setColor(new Color(color, color, color));
+    		g.fillRect(startX + i * pixelsPerColor, startY, pixelsPerColor, blockHeight);
+    	}
+	}
+	
+	
 	private void setupWindow() {
-		int controlPanelWidth = 200;
-		int inspectorHeight = 250;
-		
-		
 		//if there is currently a window, get rid of it so we can set up a new one
 		if (this.window != null) {
 			this.window.setVisible(false);
@@ -199,7 +238,6 @@ public class FishExperimentDisplay implements KeyListener, MouseListener {
 		//Setting up the panel which will contain a variety of controls.
 		JPanel controlPanel = new JPanel();
 		controlPanel.setPreferredSize(new Dimension(controlPanelWidth, world.height));
-		controlPanel.setBackground(Color.ORANGE);
 		controlPanel.setBorder(new EmptyBorder(-5, 0, 0, 0)); //getting rid of the border on the control panel
 		
 		panel.add(controlPanel, BorderLayout.LINE_END);
