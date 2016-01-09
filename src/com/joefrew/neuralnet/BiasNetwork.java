@@ -25,6 +25,7 @@ public class BiasNetwork {
 	private int[] topology;
 	
 	private List<double[]> synapseLayers;
+	private List<double[]> neuronValues;
 	
 	private ActivationFunction activation;
 	private TransferFunction transfer;
@@ -39,6 +40,7 @@ public class BiasNetwork {
 		this.transfer = transfer;
 		this.topology = topology;
 		synapseLayers = new ArrayList<double[]>();
+		neuronValues = new ArrayList<double[]>();
 		
 		//iterating over the topology and creating empty synapse layers.
 		for (int i = 1; i < topology.length; i++) {
@@ -49,10 +51,17 @@ public class BiasNetwork {
 			
 			synapseLayers.add(new double[previousLayerSize * layerSize]);
 		}
+		
+		for (int i = 0; i < topology.length; i++) {
+			int layerSize = topology[i];
+			neuronValues.add(new double[layerSize]);
+		}
 	}
 
 	
 	public double[] activate(double[] input) throws Exception {
+		
+		neuronValues.set(0, input);
 		
 		//iterating over the topology, each time calculating the input for the next layer.
 		for (int currentLayer = 1; currentLayer < topology.length; currentLayer++) {
@@ -79,6 +88,7 @@ public class BiasNetwork {
 			}
 			
 			//we've calculated all of the new inputs so replacing the old ones.
+			neuronValues.set(currentLayer, newInputs);
 			input = newInputs;
 		}
 		
@@ -93,6 +103,10 @@ public class BiasNetwork {
 	
 	public int[] getTopology() {
 		return this.topology;
+	}
+	
+	public List<double[]> getNeuronValues() {
+		return this.neuronValues;
 	}
 	
 	/**

@@ -67,6 +67,7 @@ public class TestBiasNetwork {
 			
 			assertEquals((10 + 6 + 4)/3.0, result[0], 0.0001);
 		} catch (Exception e) {
+			e.printStackTrace();
 			fail("The network should not throw an error in its current configuration.");
 		}
 	}
@@ -94,6 +95,7 @@ public class TestBiasNetwork {
 			assertEquals((1 + 3 + 5 + 100)/4.0, result[0], 0.0001);
 			assertEquals((2 + 6 + 10 + 1000)/4.0, result[1], 0.0001);
 		} catch (Exception e) {
+			e.printStackTrace();
 			fail("The network should not throw an error in its current configuration.");
 		}
 	}
@@ -126,6 +128,7 @@ public class TestBiasNetwork {
 			//202 was worked out on a piece of paper as the correct output for this network.
 			assertEquals(202, result[0], 0.0001);
 		} catch (Exception e) {
+			e.printStackTrace();
 			fail("The network should not throw an error in its current configuration.");
 		}
 	}

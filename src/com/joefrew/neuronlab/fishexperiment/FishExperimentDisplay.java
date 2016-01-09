@@ -11,6 +11,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.image.BufferStrategy;
 import java.util.Arrays;
+import java.util.List;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -134,7 +135,7 @@ public class FishExperimentDisplay implements KeyListener, MouseListener {
 	
 	private void renderInspector() {
 		World world = this.experiment.getWorld();
-		Color textColor = Color.WHITE;
+		Color textColor = Color.BLACK;
 		int textMargin = 10;
 		
 		Graphics2D g = (Graphics2D) inspectorBuffer.getDrawGraphics();
@@ -165,9 +166,9 @@ public class FishExperimentDisplay implements KeyListener, MouseListener {
 	    	renderGenome(g, selectedFish.getGenome(), textMargin, currentLine-10, controlPanelWidth-textMargin*2, 10);
 	    	currentLine += lineOffset;
 	    	
-	    	
+	    	List<double[]> fishNeurons = selectedFish.getBrain().getNeuronValues();
 	    	//render the neuron values in the brain
-	    	
+	    	renderNeurons(g, fishNeurons.toArray(new double[fishNeurons.size()][]), textMargin, currentLine, controlPanelWidth-textMargin*2, 100);
 	    }
 	    
 	    
@@ -199,6 +200,48 @@ public class FishExperimentDisplay implements KeyListener, MouseListener {
     		int color = colors[i];
     		g.setColor(new Color(color, color, color));
     		g.fillRect(startX + i * pixelsPerColor, startY, pixelsPerColor, blockHeight);
+    	}
+	}
+	
+	private void renderNeurons(Graphics2D g, double[][] neurons, int startX, int startY, int maxX, int maxY) {
+    	double highest = Double.MIN_VALUE;
+    	double smallest = Double.MAX_VALUE;
+    	int largestLayer = 1;
+    	for (double[] layer : neurons) {
+    		for (double value : layer) {    			
+    			if (value > highest) {highest = value;}
+    			if (value < smallest) {smallest = value;}
+    		}
+    		if (layer.length > largestLayer) {
+    			largestLayer = layer.length;
+    		}
+    	}
+    	
+    	double range = highest - smallest;
+    	int[][] colors = new int[neurons.length][];
+    	//iterating over each layer. working out
+    	for (int i = 0; i < neurons.length; i++) {
+    		double[] layer = neurons[i];
+    		int[] colorLayer = new int[layer.length];
+    		for (int j = 0; j < layer.length; j++) {
+    			double value = layer[j];
+    			colorLayer[j] = (int)(255 * ((value - smallest)/range));
+    		}
+    		colors[i] = colorLayer;
+    	}
+    	
+    	//number of pixels margin for the genome
+    	int blockWidth = (maxX)/largestLayer;
+    	int blockHeight = maxY/colors.length;
+    	for (int i = 0; i < colors.length; i++) {
+    		int[] colorLayer = colors[i];
+    		int layerStartX = (maxX/2) - (blockWidth * colorLayer.length)/2;
+    		for (int j = 0; j < colorLayer.length; j++) {
+    			int color = colorLayer[j];
+        		g.setColor(new Color(color, color, color));
+        		g.fillRect(startX + layerStartX + j * blockWidth, startY + blockHeight * i, blockWidth, blockHeight);
+    		}
+    		
     	}
 	}
 	
@@ -244,7 +287,7 @@ public class FishExperimentDisplay implements KeyListener, MouseListener {
 		
 		//setting up the inspector canvas in the control panel 
 		inspectorCanvas = new Canvas();
-		inspectorCanvas.setBackground(Color.BLACK);
+		//inspectorCanvas.setBackground(Color.BLACK);
 		inspectorCanvas.setBounds(0, 0, controlPanelWidth, inspectorHeight);
 		inspectorCanvas.setIgnoreRepaint(true);
 		
