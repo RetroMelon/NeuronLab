@@ -1,5 +1,6 @@
 package com.joefrew.neuronlab.fishexperiment;
 
+import java.awt.BorderLayout;
 import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -9,9 +10,12 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.image.BufferStrategy;
+import java.util.Arrays;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.border.Border;
+import javax.swing.border.EmptyBorder;
 
 
 /**
@@ -26,7 +30,9 @@ public class FishExperimentDisplay implements KeyListener, MouseListener {
 	
 	JFrame window;
 	Canvas canvas;
+	Canvas inspectorCanvas;
 	BufferStrategy buffer;
+	BufferStrategy inspectorBuffer;
 	
 	Fish selectedFish = null;
 	
@@ -65,12 +71,18 @@ public class FishExperimentDisplay implements KeyListener, MouseListener {
 			selectedFish = null;
 		}
 		
+		renderMain();
+		renderInspector();
+		
+	}
+	
+	
+	private void renderMain() {
+		World world = this.experiment.getWorld();
+		
 		//setting up the graphics object to be passed to the drawables.
 		Graphics2D g = (Graphics2D) buffer.getDrawGraphics();
-		g.setColor(Color.BLACK);
 	    g.clearRect(0, 0, world.width, world.height);
-	    
-	    
 	    
 	    //iterating over all of the food and passing the graphics object to them
 	    for (Food food : world.food) {
@@ -117,8 +129,42 @@ public class FishExperimentDisplay implements KeyListener, MouseListener {
 	    buffer.show();
 	}
 	
+	private void renderInspector() {
+		World world = this.experiment.getWorld();
+		
+		Graphics2D g = (Graphics2D) inspectorBuffer.getDrawGraphics();
+	    g.clearRect(0, 0, world.width, world.height);
+		
+	    
+	    if (this.selectedFish == null) {
+	    	g.setColor(Color.WHITE);
+	    	g.drawString("No fish selected.", 10, 15);
+	    } else {
+	    	//drawing some basic text about the fish
+	    	int lineOffset = 15;
+	    	int currentLine = lineOffset;
+	    	g.setColor(Color.WHITE);
+	    	
+	    	g.drawString("Food Eaten: " + selectedFish.getFoodEaten(), 10,  currentLine);
+	    	currentLine += lineOffset;
+	    	
+	    	g.drawString("Brain Topology: " + Arrays.toString(selectedFish.getBrain().getTopology()), 10,  currentLine);
+	    	currentLine += lineOffset;	    	
+	    	
+	    }
+	    
+	    
+	    
+	    
+	    g.dispose();
+	    inspectorBuffer.show();
+	}
 	
 	private void setupWindow() {
+		int controlPanelWidth = 200;
+		int inspectorHeight = 250;
+		
+		
 		//if there is currently a window, get rid of it so we can set up a new one
 		if (this.window != null) {
 			this.window.setVisible(false);
@@ -128,13 +174,14 @@ public class FishExperimentDisplay implements KeyListener, MouseListener {
 		World world = this.experiment.getWorld();
 		
 		window = new JFrame();
-		window.setPreferredSize(new Dimension(world.width, world.height));
+		window.setPreferredSize(new Dimension(world.width + controlPanelWidth, world.height));
 		window.setTitle("Fishies");
 		window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
 		//getting the panel inside the window so we can add the canvas to it.
 		JPanel panel = (JPanel) window.getContentPane();
-		panel.setLayout(null);
+		//panel.setLayout(null); //we want the default which is a border layout
+		
 		
 		//setting up the canvas and adding it to the window
 		canvas = new Canvas();
@@ -146,8 +193,24 @@ public class FishExperimentDisplay implements KeyListener, MouseListener {
 		canvas.addKeyListener(this);
 		canvas.addMouseListener(this);
 		
-		panel.add(canvas);
+		panel.add(canvas, BorderLayout.LINE_START);
 		
+		
+		//Setting up the panel which will contain a variety of controls.
+		JPanel controlPanel = new JPanel();
+		controlPanel.setPreferredSize(new Dimension(controlPanelWidth, world.height));
+		controlPanel.setBackground(Color.ORANGE);
+		controlPanel.setBorder(new EmptyBorder(-5, 0, 0, 0)); //getting rid of the border on the control panel
+		
+		panel.add(controlPanel, BorderLayout.LINE_END);
+		
+		//setting up the inspector canvas in the control panel 
+		inspectorCanvas = new Canvas();
+		inspectorCanvas.setBackground(Color.BLACK);
+		inspectorCanvas.setBounds(0, 0, controlPanelWidth, inspectorHeight);
+		inspectorCanvas.setIgnoreRepaint(true);
+		
+		controlPanel.add(inspectorCanvas);
 		
 		//packing up the window content and setting it to visible
 		window.setResizable(false);
@@ -157,7 +220,10 @@ public class FishExperimentDisplay implements KeyListener, MouseListener {
 		
 		//setting up buffer strategy for the canvas and focussing on it
 		canvas.createBufferStrategy(2);
-      	buffer = canvas.getBufferStrategy();
+	  	buffer = canvas.getBufferStrategy();
+	  	
+		inspectorCanvas.createBufferStrategy(2);
+	  	inspectorBuffer = inspectorCanvas.getBufferStrategy();
 	      
 	    canvas.requestFocus();
 	}
@@ -223,19 +289,16 @@ public class FishExperimentDisplay implements KeyListener, MouseListener {
 
 
 	public void mouseClicked(MouseEvent e) {
-		System.out.println("clicked: " + e);
 		
 	}
 
 
 	public void mousePressed(MouseEvent e) {
-		System.out.println("pressed: " + e);
 		if (e.getButton() == MouseEvent.BUTTON1) {
 			//checking each fish in the world for a collision
 			boolean collision = false;
 			
 			for (Fish fish : experiment.getWorld().fish) {
-				System.out.println("Checking for collision");
 				if (fish.pointCollision(e.getX(), e.getY())) {
 					collision = true;
 					this.selectedFish = fish; 
@@ -252,19 +315,16 @@ public class FishExperimentDisplay implements KeyListener, MouseListener {
 
 
 	public void mouseReleased(MouseEvent e) {
-		// TODO Auto-generated method stub
 		
 	}
 
 
 	public void mouseEntered(MouseEvent e) {
-		// TODO Auto-generated method stub
 		
 	}
 
 
 	public void mouseExited(MouseEvent e) {
-		// TODO Auto-generated method stub
 		
 	}
 	

@@ -44,10 +44,22 @@ public class Fish implements ExperimentRenderable, Genomic, Scorable, PointColli
 		this.render(g, 0);
 	}
 	
+	
+	private Color getBodyColor() {
+		double foodScore = this.getFoodEaten() / 10.0;
+		if (foodScore > 1) {
+			foodScore = 1;
+		}
+		double H = foodScore * 0.4; // Hue (note 0.4 = Green, see huge chart below)
+	    double S = 0.9; // Saturation
+	    double B = 0.9; // Brightness
+
+	    return Color.getHSBColor((float)H, (float)S, (float)B);
+	}
 
 	public void render(Graphics2D g, int debugLevel) {
 		//drawing body
-		g.setColor(Color.RED);
+		g.setColor(this.getBodyColor());
 		g.fillOval((int)(x-size), (int)(y-size), (int)(size * 2), (int)(size * 2));
 		
 
