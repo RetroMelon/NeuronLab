@@ -16,7 +16,7 @@ public class Fish implements ExperimentRenderable, Genomic, Scorable {
 
 	double x = 300;
 	double y = 300;
-	int size = 20; // the radius of the 
+	int size = 10; // the radius of the 
 	double rotation = 0; //rotation in radians
 	
 	int eyeDistance = (int)(size * 1.2);
@@ -50,16 +50,16 @@ public class Fish implements ExperimentRenderable, Genomic, Scorable {
 		Point2D eye1Location = this.getEyeLocation(0);
 		Point2D eye2Location = this.getEyeLocation(1);
 		
-		if (this.currentFood != null) {			
+		if (this.currentFood != null && !this.currentFood.isEaten()) {			
 			//drawing lines to the food is there is any
-			g.setColor(Color.YELLOW);
+			g.setColor(Color.CYAN);
 			
 			g.drawLine((int)(eye1Location.getX()), (int)(eye1Location.getY()), (int)(currentFood.getX()), (int)(currentFood.getY()));
 			g.drawLine((int)(eye2Location.getX()), (int)(eye2Location.getY()), (int)(currentFood.getX()), (int)(currentFood.getY()));
 		}
 		
 		//drawing eyes
-		g.setColor(Color.BLUE);
+		g.setColor(Color.YELLOW);
 		
 		g.fillOval((int)(eye1Location.getX() - eyeSize), (int)(eye1Location.getY() - eyeSize), (int)(eyeSize * 2), (int)(eyeSize * 2));
 		g.fillOval((int)(eye2Location.getX() - eyeSize), (int)(eye2Location.getY() - eyeSize), (int)(eyeSize * 2), (int)(eyeSize * 2));
@@ -72,11 +72,7 @@ public class Fish implements ExperimentRenderable, Genomic, Scorable {
 	public void update(World world) {
 		double[] brainInputs = sense(world);
 		
-		System.out.println("\t\t" + Arrays.toString(brainInputs));
-		
 		double[] brainOutputs = brain(brainInputs);
-		
-		System.out.println(Arrays.toString(brainOutputs));
 		
 		if (brainOutputs != null) {
 			this.speed = brainOutputs[0] * maxSpeed;

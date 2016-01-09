@@ -10,5 +10,14 @@ public class World {
 	
 	public int width = 640;
 	public int height = 480;
+	
+	public World() {
+		
+	}
+	
+	public World(int width, int height) {
+		this.width = width;
+		this.height = height;
+	}
 
 }

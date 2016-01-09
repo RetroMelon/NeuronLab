@@ -14,15 +14,27 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 import com.joefrew.neuralnet.BiasNetwork;
+import com.joefrew.neuralnet.genetics.GeneticAlgorithm;
 import com.joefrew.neuralnet.genetics.Mutator;
 import com.joefrew.neuronlab.Experiment;
 
 public class FishExperiment implements Experiment {
 	
-	World world = new World();
+	Random random = new Random();
+	
+	World world = new World(1000, 700);
 	
 	FishExperimentDisplay display;
 	FishSimulation simulation;
+	
+	//experiment variables like fish per generation, etc.
+	int simTicksPerGeneration = 100000;
+	
+	int genomesPerGeneration = 15;
+	int selectedGenomes = 4; //how many fish get to breed
+	
+	int[] brainTopology = new int[]{2, 3, 2};
+	int genomeLength = (new BiasNetwork(brainTopology)).getGenome().length; //TODO: eliminate the need for this
 	
 	//the preferred number of simulation ticks per second
 	int preferredSimTicks = 1000;
@@ -31,8 +43,7 @@ public class FishExperiment implements Experiment {
 	//the preferred frame rate per second and the number of milliseconds per frame
 	int preferredFrameRate = 100;
 	int nanosPerFrame = (1000 * 1000 * 1000)/preferredFrameRate;
-	
-	long currentSimTick = 0;
+
 	long currentFrame = 0;
 	
 	//the times in nanos of the last tick and frame.
@@ -41,52 +52,74 @@ public class FishExperiment implements Experiment {
 	
 	boolean running = false;
 	
-	//food will spawn about once every 500 simulation ticks
-	double foodSpawnChance = 1/1000.0;
+	int currentGeneration = 1;
 	
 	public void run() throws Exception {
 		//setting up the display
-		this.display = new FishExperimentDisplay(this.world.width, this.world.height);
-		this.simulation = new FishSimulation(this.world);
+		this.display = new FishExperimentDisplay(this.world.width, this.world.height, this);
 		
-		//setting up an initial generation of fish
+		//setting up a genetic algorithm which will breed/mutate the generations
+		Mutator mutator = new Mutator(0.2, 0.2, 0.2);
+		GeneticAlgorithm geneticAlgorithm = new GeneticAlgorithm(mutator, selectedGenomes);
 		
-		//setting up a genetic algorithm to breed/mutate the generations
 		
+		//setting up an initial generation of genomes
+		List<double[]> genomes = new ArrayList<double[]>();
+		for (int i = 0; i < genomesPerGeneration; i++) {
+			genomes.add(mutator.mutate(new double[genomeLength], 1, 1, 0.5)); //mutating every gene but +/- (1 +/- 0.5)
+		}
 		
 		//while true, put the fish in a simulation and run it. then get a new generation from the genetic algorithm
 		//and run it in a new simulation
-		//while (true) {
-			//simulating the fish
-			//world.fish = currentGeneration.getFish();
-			//world.food.clear();
+		while (true) {
+			//generating new fish and brains from the set of genomes
+			List<Fish> fish = new ArrayList<Fish>();
+			for (double[] genome : genomes) {
+				BiasNetwork brain = new BiasNetwork(brainTopology);
+				brain.setGenome(genome);
+				
+				fish.add(new Fish(brain, random.nextDouble() * world.width, random.nextDouble() * world.height));
+			}
+			
+			//setting up the world with the fish and clearing the food
+			world.fish = fish;
+			world.food.clear();
+			
+			//creating a new simulation
+			this.simulation = new FishSimulation(this.world);
 		
-			//runSimulation();
+			//running the fish simulation for a finite number of ticks
+			runSimulation();
 		
-			//getting a new generation from the genetic algorithm
-			//currentGeneration = geneticAlgorithm.newGeneration(currentGeneration);
-		//}
+			//getting a new generation of genomes from the genetic algorithm
+			genomes = geneticAlgorithm.process(world.fish, genomesPerGeneration);
+			currentGeneration++;
+		}
 		
 		
 		//setting up a fish brain
-		BiasNetwork network = new BiasNetwork(2, 2, 2);
-		Mutator mutator = new Mutator();
+//		BiasNetwork network = new BiasNetwork(2, 2, 2);
+//		Mutator mutator = new Mutator();
+//		
+//		double[] mutatedGenome = mutator.mutate(network.getGenome(), 1, 5, 5);
+//				
+//		System.out.println(Arrays.toString(mutatedGenome));
+//		
+//		network.setGenome(mutatedGenome);
 		
-		double[] mutatedGenome = mutator.mutate(network.getGenome(), 1, 5, 5);
-				
-		System.out.println(Arrays.toString(mutatedGenome));
 		
-		network.setGenome(mutatedGenome);
+//		world.fish.add(new Fish(network, 100, 100));
 		
-		
-		world.fish.add(new Fish(network, 100, 100));
+	}
+
+	private void runSimulation() {
 		running = true;
-		while(running) {
+		while(this.simulation.getCurrentSimTick() < simTicksPerGeneration && running) {
 			//checking if we are due to perform another sim tick
 			long currentTime = System.nanoTime();
 			if (currentTime - lastSimTick > nanosPerSimTick) {
 				lastSimTick = currentTime;
-				simTick();
+				this.simulation.tick();
 			}
 			
 			currentTime = System.nanoTime();
@@ -96,15 +129,12 @@ public class FishExperiment implements Experiment {
 			}
 		}
 	}
-	
-	private void simTick() {
-		this.simulation.tick();
-	}
+
 	
 	private void render() {
 		currentFrame++;
 		
-		display.render(world, this);
+		display.render(world);
 	}
 
 	public World getWorld() {
@@ -142,14 +172,15 @@ public class FishExperiment implements Experiment {
 	}
 
 	public long getCurrentSimTick() {
-		return currentSimTick;
+		return this.simulation.getCurrentSimTick();
 	}
 
 	public long getCurrentFrame() {
 		return currentFrame;
 	}
 	
-	
-	
+	public int getCurrentGeneration() {
+		return currentGeneration;
+	}	
 
 }
