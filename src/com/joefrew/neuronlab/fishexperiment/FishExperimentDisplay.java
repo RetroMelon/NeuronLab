@@ -151,7 +151,7 @@ public class FishExperimentDisplay implements KeyListener, MouseListener {
 	    	int currentLine = lineOffset;
 	    	g.setColor(textColor);
 	    	
-	    	g.drawString("Food Eaten: " + selectedFish.getFoodEaten(), textMargin,  currentLine);
+	    	g.drawString("Score: " + selectedFish.getScore(), textMargin,  currentLine);
 	    	currentLine += lineOffset;
 	    	
 	    	g.drawString("Brain Topology: " + Arrays.toString(selectedFish.getBrain().getTopology()), textMargin,  currentLine);

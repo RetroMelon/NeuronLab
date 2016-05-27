@@ -82,8 +82,10 @@ public class FishExperiment implements Experiment {
 			for (double[] genome : genomes) {
 				BiasNetwork brain = new BiasNetwork(brainTopology);
 				brain.setGenome(genome);
-				
-				fish.add(new Fish(brain, random.nextDouble() * world.width, random.nextDouble() * world.height));
+				SimpleFish sFish = new SimpleFish(brain);
+				sFish.setX(random.nextDouble() * world.width);
+				sFish.setY(random.nextDouble() * world.height);
+				fish.add(sFish);
 			}
 			
 			//setting up the world with the fish and clearing the food
