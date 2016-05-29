@@ -30,10 +30,10 @@ public class FishExperiment implements Experiment {
 	//experiment variables like fish per generation, etc.
 	int simTicksPerGeneration = 100000;
 	
-	int genomesPerGeneration = 15;
+	int genomesPerGeneration = 15; //15
 	int selectedGenomes = 4; //how many fish get to breed
 	
-	int[] brainTopology = new int[]{2, 3, 2};
+	int[] brainTopology = new int[]{3, 3, 2, 2};
 	int genomeLength = (new BiasNetwork(brainTopology)).getGenome().length; //TODO: eliminate the need for this
 	
 	//the preferred number of simulation ticks per second
@@ -64,7 +64,7 @@ public class FishExperiment implements Experiment {
 		this.display = new FishExperimentDisplay(this);
 		
 		//setting up a genetic algorithm which will breed/mutate the generations
-		Mutator mutator = new Mutator(0.2, 0.2, 0.2);
+		Mutator mutator = new Mutator(0.2, 0.6, 0.2);
 		GeneticAlgorithm geneticAlgorithm = new GeneticAlgorithm(mutator, selectedGenomes);
 		
 		
@@ -82,7 +82,7 @@ public class FishExperiment implements Experiment {
 			for (double[] genome : genomes) {
 				BiasNetwork brain = new BiasNetwork(brainTopology);
 				brain.setGenome(genome);
-				SimpleFish sFish = new SimpleFish(brain);
+				SimpleFish sFish = new BlindersFish(brain);
 				sFish.setX(random.nextDouble() * world.width);
 				sFish.setY(random.nextDouble() * world.height);
 				fish.add(sFish);

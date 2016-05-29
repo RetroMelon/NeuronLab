@@ -153,7 +153,7 @@ public class FishExperimentDisplay implements KeyListener, MouseListener {
 	    	
 	    	g.drawString("Score: " + selectedFish.getScore(), textMargin,  currentLine);
 	    	currentLine += lineOffset;
-	    	
+
 	    	g.drawString("Brain Topology: " + Arrays.toString(selectedFish.getBrain().getTopology()), textMargin,  currentLine);
 	    	currentLine += lineOffset;	    	
 	    	
@@ -328,6 +328,10 @@ public class FishExperimentDisplay implements KeyListener, MouseListener {
 		
 		switch (e.getKeyCode()) {
 		case KeyEvent.VK_P :
+			experiment.setPaused(!experiment.isPaused());
+			break;
+			
+		case KeyEvent.VK_SPACE :
 			experiment.setPaused(!experiment.isPaused());
 			break;
 		

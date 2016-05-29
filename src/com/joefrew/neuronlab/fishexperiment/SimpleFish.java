@@ -13,18 +13,20 @@ import com.joefrew.neuralnet.BiasNetwork;
  */
 public class SimpleFish extends Fish {
 
-	public SimpleFish(BiasNetwork brain) {
+	public SimpleFish(BiasNetwork brain) {		
 		super(brain);
 	}
 	
-	private transient double rotation = 0; //rotation in radians
+	transient double rotation = 0; //rotation in radians
 	
 	int eyeDistance = (int)(getSize() * 1.2);
-	double eyeSplay = 0.8; //the offset of the eyes from centre in radians
-	int eyeSize = 5;
+	double eyeSplay = 1; //the offset of the eyes from centre in radians. NOTE: do not use Math.PI or anything here, because it will cause rounding when calculating eye location.
+	int eyeSize = 3;
+	
+	int numberOfEyes = 3;
 	
 	//The size of the collision radius for food
-	int collisionSize = (int)(getSize() * 1.8);
+	int collisionSize = (int)(getSize() * 2);
 	
 	double maxSpeed = 2.0; //2 pixels per tick pax speed
 	double speed = 0; //this will be linked to the brain so can vary between maxSpeed and -maxSpeed 
@@ -56,23 +58,22 @@ public class SimpleFish extends Fish {
 		g.fillOval((int)(this.getX()-this.getSize()), (int)(this.getY()-this.getSize()), (int)(this.getSize() * 2), (int)(this.getSize() * 2));
 		
 
-		
-		Point2D eye1Location = this.getEyeLocation(0);
-		Point2D eye2Location = this.getEyeLocation(1);
-		
-		if (debugLevel >= 1 && this.currentFood != null && !this.currentFood.isEaten()) {			
-			//drawing lines to the food is there is any
-			g.setColor(Color.CYAN);
+		for (int i = 0; i < numberOfEyes; i++) {
+			Point2D eyeLocation = this.getEyeLocation(i);
 			
-			g.drawLine((int)(eye1Location.getX()), (int)(eye1Location.getY()), (int)(currentFood.getX()), (int)(currentFood.getY()));
-			g.drawLine((int)(eye2Location.getX()), (int)(eye2Location.getY()), (int)(currentFood.getX()), (int)(currentFood.getY()));
+			if (debugLevel >= 1 && this.currentFood != null && !this.currentFood.isEaten()) {			
+				//drawing lines to the food is there is any
+				g.setColor(Color.CYAN);
+				
+				g.drawLine((int)(eyeLocation.getX()), (int)(eyeLocation.getY()), (int)(currentFood.getX()), (int)(currentFood.getY()));
+			}
+			
+			//drawing eyes
+			g.setColor(Color.YELLOW);
+			
+			g.fillOval((int)(eyeLocation.getX() - eyeSize), (int)(eyeLocation.getY() - eyeSize), (int)(eyeSize * 2), (int)(eyeSize * 2));		
 		}
 		
-		//drawing eyes
-		g.setColor(Color.YELLOW);
-		
-		g.fillOval((int)(eye1Location.getX() - eyeSize), (int)(eye1Location.getY() - eyeSize), (int)(eyeSize * 2), (int)(eyeSize * 2));
-		g.fillOval((int)(eye2Location.getX() - eyeSize), (int)(eye2Location.getY() - eyeSize), (int)(eyeSize * 2), (int)(eyeSize * 2));		
 	}
 	
 	/**
@@ -99,26 +100,29 @@ public class SimpleFish extends Fish {
 		
 		//if there was no piece of food to detect, return max_values
 		if (closestFood == null) {
-			return new double[]{Double.MAX_VALUE, Double.MAX_VALUE};
+			return new double[numberOfEyes];
 		} else {
 			this.currentFood = closestFood;
 		}
 		
 		//we now have the closest piece of food, so finding the distance between it and the two eyes
-		Point2D eye0Location = this.getEyeLocation(0);
-		int differenceX = (int)eye0Location.getX() - (int)closestFood.getX();
-		int differenceY = (int)eye0Location.getY() - (int)closestFood.getY();
+		double[] distances = new double[numberOfEyes];
 		
-		int distanceEye0 = (int)Math.sqrt((differenceX*differenceX)+(differenceY*differenceY));
+		for (int i = 0; i < numberOfEyes; i++) {
+			Point2D eyeLocation = this.getEyeLocation(i);
+			int differenceX = (int)eyeLocation.getX() - (int)closestFood.getX();
+			int differenceY = (int)eyeLocation.getY() - (int)closestFood.getY();
+			
+			int distanceEye = (int)Math.sqrt((differenceX*differenceX)+(differenceY*differenceY));
+			
+			distances[i] = distanceEye;
+		}
 		
-		Point2D eye1Location = this.getEyeLocation(1);
-		differenceX = (int)eye1Location.getX() - (int)closestFood.getX();
-		differenceY = (int)eye1Location.getY() - (int)closestFood.getY();
 		
-		int distanceEye1 = (int)Math.sqrt((differenceX*differenceX)+(differenceY*differenceY));
-		
-		return new double[]{distanceEye0, distanceEye1};
+		return distances;
 	}
+	
+	
 	
 	public void move(World world) {
 		rotation += rotationSpeed;
@@ -202,12 +206,9 @@ public class SimpleFish extends Fish {
 	 * @return
 	 */
 	public Point2D getEyeLocation(int eyeNumber) {
-		double angle = rotation;
-		if (eyeNumber == 0) { //adding on the eye splay depending on which eye it is.
-			angle -= eyeSplay;
-		} else {
-			angle += eyeSplay;
-		}
+		double angle = (rotation % (2 * Math.PI)); //accounting for the number of eyes
+		angle -= (((double)numberOfEyes-1 * eyeSplay) / 2.0); //NOTE: rounding errors tend to happen here if eyeSplay has PI in it.
+		angle += (double)eyeNumber * eyeSplay;
 		
 		double eyex = this.getX() + Math.sin(angle) * eyeDistance; //relative to body centre
 		double eyey = this.getY() - Math.cos(angle) * eyeDistance;

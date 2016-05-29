@@ -27,7 +27,7 @@ public abstract class Fish implements ExperimentRenderable, Genomic, Scorable, P
 
 	private transient double x = 300;
 	private transient double y = 300;
-	private transient int size = 10; // the radius of the 
+	private transient int size = 15; // the radius of the 
 
 	//The size of the collision radius for food
 	private transient int collisionSize = (int)(size * 1.8);

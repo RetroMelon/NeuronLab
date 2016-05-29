@@ -61,6 +61,10 @@ public class BiasNetwork {
 	
 	public double[] activate(double[] input) throws Exception {
 		
+		if (input.length != topology[0]) {
+			throw new Exception("input vector of size " + input.length + " given. Network requires size " + topology[0] + ".");
+		}
+		
 		neuronValues.set(0, input);
 		
 		//iterating over the topology, each time calculating the input for the next layer.
