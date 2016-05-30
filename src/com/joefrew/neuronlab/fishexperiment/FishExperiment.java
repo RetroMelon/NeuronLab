@@ -31,8 +31,8 @@ public class FishExperiment implements Experiment {
 	int simTicksPerGeneration = 100000;
 	
 	int genomesPerGeneration = 15; //15
-	int selectedGenomes = 4; //how many fish get to breed
-	
+	int successfulGenomes = 4; //how many fish get to breed
+
 	int[] brainTopology = new int[]{3, 3, 2, 2};
 	int genomeLength = (new BiasNetwork(brainTopology)).getGenome().length; //TODO: eliminate the need for this
 	
@@ -65,7 +65,7 @@ public class FishExperiment implements Experiment {
 		
 		//setting up a genetic algorithm which will breed/mutate the generations
 		Mutator mutator = new Mutator(0.2, 0.6, 0.2);
-		GeneticAlgorithm geneticAlgorithm = new GeneticAlgorithm(mutator, selectedGenomes);
+		GeneticAlgorithm geneticAlgorithm = new GeneticAlgorithm(mutator, successfulGenomes);
 		
 		
 		//setting up an initial generation of genomes
@@ -222,6 +222,31 @@ public class FishExperiment implements Experiment {
 	
 	public int getCurrentGeneration() {
 		return currentGeneration;
-	}	
+	}
+
+	public int getSimTicksPerGeneration() {
+		return simTicksPerGeneration;
+	}
+
+	public void setSimTicksPerGeneration(int simTicksPerGeneration) {
+		this.simTicksPerGeneration = simTicksPerGeneration;
+	}
+	
+	public int getGenomesPerGeneration() {
+		return genomesPerGeneration;
+	}
+
+	public void setGenomesPerGeneration(int genomesPerGeneration) {
+		this.genomesPerGeneration = genomesPerGeneration;
+	}
+
+	public int getSuccessfulGenomes() {
+		return successfulGenomes;
+	}
+
+	public void setSuccessfulGenomes(int successfulGenomes) {
+		this.successfulGenomes = successfulGenomes;
+	}
+
 
 }

@@ -5,6 +5,7 @@ import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
+import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
@@ -13,10 +14,19 @@ import java.awt.image.BufferStrategy;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JSpinner;
+import javax.swing.JTextField;
+import javax.swing.SpinnerModel;
+import javax.swing.SpinnerNumberModel;
+import javax.swing.SwingConstants;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 
 /**
@@ -35,10 +45,13 @@ public class FishExperimentDisplay implements KeyListener, MouseListener {
 	BufferStrategy buffer;
 	BufferStrategy inspectorBuffer;
 	
+	JSpinner ticksPerSecondField;
+	JSpinner framesPerSecondField;
+	
 	Fish selectedFish = null;
 	
 	int controlPanelWidth = 200;
-	int inspectorHeight = 250;
+	int inspectorHeight = 200;
 	
 	public FishExperimentDisplay (FishExperiment experiment) {
 		this.setExperiment(experiment);
@@ -144,7 +157,7 @@ public class FishExperimentDisplay implements KeyListener, MouseListener {
 	    
 	    if (this.selectedFish == null) {
 	    	g.setColor(textColor);
-	    	g.drawString("No fish selected.", textMargin, 15);
+	    	g.drawString("Click a fish to inspect.", textMargin, 15);
 	    } else {
 	    	//drawing some basic text about the fish
 	    	int lineOffset = 15;
@@ -281,7 +294,7 @@ public class FishExperimentDisplay implements KeyListener, MouseListener {
 		//Setting up the panel which will contain a variety of controls.
 		JPanel controlPanel = new JPanel();
 		controlPanel.setPreferredSize(new Dimension(controlPanelWidth, world.height));
-		controlPanel.setBorder(new EmptyBorder(-5, 0, 0, 0)); //getting rid of the border on the control panel
+		controlPanel.setBorder(new EmptyBorder(0, 0, 0, 0)); //getting rid of the border on the control panel
 		
 		panel.add(controlPanel, BorderLayout.LINE_END);
 		
@@ -293,6 +306,106 @@ public class FishExperimentDisplay implements KeyListener, MouseListener {
 		
 		controlPanel.add(inspectorCanvas);
 		
+		//setting up the field for ticks per gen
+		SpinnerModel ticksPerGenModel =
+		        new SpinnerNumberModel(experiment.getSimTicksPerGeneration(), 100, Integer.MAX_VALUE, 100);
+		final JSpinner ticksPerGenField = new JSpinner(ticksPerGenModel);
+		ticksPerGenField.getEditor().getComponent(0).addKeyListener(new KeyAdapter(){
+            @Override
+            public void keyReleased(KeyEvent ke) {
+            	if (ke.getKeyCode() == KeyEvent.VK_ENTER) {
+            		Integer val = (Integer)ticksPerGenField.getValue();
+            		experiment.setSimTicksPerGeneration(val);            		
+            	}
+            }
+        });
+		
+		ticksPerGenField.addChangeListener(new ChangeListener() {
+	        public void stateChanged(ChangeEvent e) {
+	        	Integer val = (Integer)ticksPerGenField.getValue();
+        		experiment.setSimTicksPerGeneration(val);  
+	        }
+	    });
+		
+		JLabel ticksLabel = new JLabel("Ticks Per Generation:");
+		ticksLabel.setHorizontalAlignment(JLabel.LEFT);
+		ticksLabel.setLabelFor(ticksPerGenField);
+		
+		controlPanel.add(ticksLabel);
+		controlPanel.add(ticksPerGenField);
+		
+		//setting up the ticks per second field
+		final JLabel ticksPerSecondLabel = new JLabel("Tick Rate:     ");
+		SpinnerModel ticksModel =
+		        new SpinnerNumberModel(experiment.getPreferredSimTicks(), 0, 100000, 50);
+		final JSpinner finalTicksPerSecField = new JSpinner(ticksModel);
+		finalTicksPerSecField.getEditor().getComponent(0).addKeyListener(new KeyAdapter(){
+            @Override
+            public void keyReleased(KeyEvent ke) {
+            	if (ke.getKeyCode() == KeyEvent.VK_ENTER) {
+            		Integer val = (Integer)finalTicksPerSecField.getValue();
+            		experiment.setPreferredSimTicks(val);    
+            		
+            		ticksPerSecondLabel.setText("Tick Rate:     ");
+            	} else {
+            		ticksPerSecondLabel.setText("Tick Rate:*    ");
+            	}
+            }
+        });
+
+		finalTicksPerSecField.addChangeListener(new ChangeListener() {
+	        public void stateChanged(ChangeEvent e) {
+	        	Integer val = (Integer)finalTicksPerSecField.getValue();
+        		experiment.setPreferredSimTicks(val);   
+        		
+        		ticksPerSecondLabel.setText("Tick Rate:     ");
+	        }
+	    });
+		
+		ticksPerSecondLabel.setHorizontalAlignment(JLabel.LEFT);
+		ticksPerSecondLabel.setLabelFor(finalTicksPerSecField);
+		
+		controlPanel.add(ticksPerSecondLabel);
+		controlPanel.add(finalTicksPerSecField);
+		ticksPerSecondField = finalTicksPerSecField;
+		
+		
+		//setting up the frames per second field
+		final JLabel framesPerSecondLabel = new JLabel("Frame Rate: ");
+		SpinnerModel framesModel =
+		        new SpinnerNumberModel(experiment.getPreferredFrameRate(), 0, 100000, 10);
+		final JSpinner finalFramesPerSecField = new JSpinner(framesModel);
+		finalFramesPerSecField.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyReleased(KeyEvent ke) {
+						
+				if (ke.getKeyCode() == KeyEvent.VK_ENTER) {
+					Integer val = (Integer)finalFramesPerSecField.getValue();
+					experiment.setPreferredFrameRate(val);
+					
+					framesPerSecondLabel.setText("Frame Rate: ");
+				} else {
+					framesPerSecondLabel.setText("Frame Rate:*");
+				}
+			}
+		});
+		
+		finalFramesPerSecField.addChangeListener(new ChangeListener() {
+	        public void stateChanged(ChangeEvent e) {
+	        	Integer val = (Integer)finalFramesPerSecField.getValue();
+				experiment.setPreferredFrameRate(val); 
+				
+				framesPerSecondLabel.setText("Frame Rate: ");
+	        }
+	    });
+
+		framesPerSecondLabel.setHorizontalAlignment(JLabel.LEFT);
+		framesPerSecondLabel.setLabelFor(finalFramesPerSecField);
+
+		controlPanel.add(framesPerSecondLabel);
+		controlPanel.add(finalFramesPerSecField);
+		framesPerSecondField = finalFramesPerSecField;
+
 		//packing up the window content and setting it to visible
 		window.setResizable(false);
 	    window.pack();
@@ -337,24 +450,30 @@ public class FishExperimentDisplay implements KeyListener, MouseListener {
 		
 		//DECREMENT PREFERRED TICKS/S
 		case KeyEvent.VK_N :
-			int simTicks = experiment.getPreferredSimTicks() - tickRateChangeFactor;
-			experiment.setPreferredSimTicks(simTicks);
+			int simDecTicks = experiment.getPreferredSimTicks() - tickRateChangeFactor;
+			experiment.setPreferredSimTicks(simDecTicks);
+			ticksPerSecondField.setValue(Integer.valueOf(simDecTicks));
 			break;
 		
 		//INCREMENT PREFERRED TICKS/s
 		case KeyEvent.VK_M :
-			experiment.setPreferredSimTicks(experiment.getPreferredSimTicks() + tickRateChangeFactor);
+			int simIncTicks = experiment.getPreferredSimTicks() + tickRateChangeFactor;
+			experiment.setPreferredSimTicks(simIncTicks);
+			ticksPerSecondField.setValue(Integer.valueOf(simIncTicks));
 			break;
 			
 		//DECREMENT PREFERRED FRAMES/S
 		case KeyEvent.VK_K :
 			int frames = experiment.getPreferredFrameRate() - frameRateChangeFactor;
 			experiment.setPreferredFrameRate(frames);
+			framesPerSecondField.setValue(Integer.valueOf(frames));
 			break;
 		
 		//INCREMENT PREFERRED TICKS/S
 		case KeyEvent.VK_L :
-			experiment.setPreferredFrameRate(experiment.getPreferredFrameRate() + frameRateChangeFactor);
+			int framesInc = experiment.getPreferredFrameRate() + frameRateChangeFactor;
+			experiment.setPreferredFrameRate(framesInc);
+			framesPerSecondField.setValue(Integer.valueOf(framesInc));
 			break;
 		
 		//TOGGLE SHIFT (increases and decreases change rates)
