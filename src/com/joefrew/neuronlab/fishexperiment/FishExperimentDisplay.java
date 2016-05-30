@@ -5,6 +5,8 @@ import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -14,16 +16,13 @@ import java.awt.image.BufferStrategy;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.swing.JFormattedTextField;
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
-import javax.swing.JTextField;
 import javax.swing.SpinnerModel;
 import javax.swing.SpinnerNumberModel;
-import javax.swing.SwingConstants;
-import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -40,6 +39,7 @@ public class FishExperimentDisplay implements KeyListener, MouseListener {
 	FishExperiment experiment;
 	
 	JFrame window;
+	
 	Canvas canvas;
 	Canvas inspectorCanvas;
 	BufferStrategy buffer;
@@ -47,8 +47,12 @@ public class FishExperimentDisplay implements KeyListener, MouseListener {
 	
 	JSpinner ticksPerSecondField;
 	JSpinner framesPerSecondField;
+	JButton foodPlacementButton;
 	
 	Fish selectedFish = null;
+	
+	enum MouseMode {FISH_SELECT, FOOD_PLACEMENT};
+	MouseMode mouseMode = MouseMode.FISH_SELECT;
 	
 	int controlPanelWidth = 200;
 	int inspectorHeight = 200;
@@ -92,7 +96,6 @@ public class FishExperimentDisplay implements KeyListener, MouseListener {
 		renderInspector();
 		
 	}
-	
 	
 	private void renderMain() {
 		World world = this.experiment.getWorld();
@@ -141,6 +144,12 @@ public class FishExperimentDisplay implements KeyListener, MouseListener {
 	    	g.drawString("Target Ticks/s: " + experiment.getPreferredSimTicks() + "\t       Target Frames/s: " + experiment.getPreferredFrameRate(), 10, world.height-10);
 	    }
 	    
+	    //rendering a changeable message above the tick rate
+	    if (mouseMode == MouseMode.FOOD_PLACEMENT) {
+	    	g.setColor(Color.RED);
+	    	g.drawString("Click to place food. [ESC] to exit.", 10, 25);
+	    }
+	    
 	    //disposing of the graphics objects and showing the buffer on screen.
 	    g.dispose();
 	    buffer.show();
@@ -175,7 +184,6 @@ public class FishExperimentDisplay implements KeyListener, MouseListener {
 	    	
 	    	//rendering the genome as a series of black and white boxes
 	    	//getting the genome, finding the highest and smallest, and then scaling the whiteness factor appropriately
-	    	int margin = 10;
 	    	renderGenome(g, selectedFish.getGenome(), textMargin, currentLine-10, controlPanelWidth-textMargin*2, 10);
 	    	currentLine += lineOffset;
 	    	
@@ -290,7 +298,6 @@ public class FishExperimentDisplay implements KeyListener, MouseListener {
 		
 		panel.add(canvas, BorderLayout.LINE_START);
 		
-		
 		//Setting up the panel which will contain a variety of controls.
 		JPanel controlPanel = new JPanel();
 		controlPanel.setPreferredSize(new Dimension(controlPanelWidth, world.height));
@@ -304,7 +311,31 @@ public class FishExperimentDisplay implements KeyListener, MouseListener {
 		inspectorCanvas.setBounds(0, 0, controlPanelWidth, inspectorHeight);
 		inspectorCanvas.setIgnoreRepaint(true);
 		
-		controlPanel.add(inspectorCanvas);
+		controlPanel.add(inspectorCanvas, BorderLayout.WEST);
+		
+		controlPanel.add(setupSimControlsPanel(new Dimension(controlPanelWidth, 100)), BorderLayout.WEST);
+		controlPanel.add(setupGodControlsPanel(new Dimension(controlPanelWidth, 100)), BorderLayout.WEST);
+
+		//packing up the window content and setting it to visible
+		window.setResizable(false);
+	    window.pack();
+		
+		window.setVisible(true);
+		
+		//setting up buffer strategy for the canvas and focussing on it
+		canvas.createBufferStrategy(2);
+	  	buffer = canvas.getBufferStrategy();
+	  	
+		inspectorCanvas.createBufferStrategy(2);
+	  	inspectorBuffer = inspectorCanvas.getBufferStrategy();
+	      
+	    canvas.requestFocus();
+	}
+	
+	private JPanel setupSimControlsPanel(Dimension preferredSize) {
+		JPanel simControlPanel = new JPanel();
+		simControlPanel.setPreferredSize(preferredSize);
+		simControlPanel.setBorder(new EmptyBorder(0, 0, 0, 0));
 		
 		//setting up the field for ticks per gen
 		SpinnerModel ticksPerGenModel =
@@ -331,8 +362,8 @@ public class FishExperimentDisplay implements KeyListener, MouseListener {
 		ticksLabel.setHorizontalAlignment(JLabel.LEFT);
 		ticksLabel.setLabelFor(ticksPerGenField);
 		
-		controlPanel.add(ticksLabel);
-		controlPanel.add(ticksPerGenField);
+		simControlPanel.add(ticksLabel);
+		simControlPanel.add(ticksPerGenField);
 		
 		//setting up the ticks per second field
 		final JLabel ticksPerSecondLabel = new JLabel("Tick Rate:     ");
@@ -365,8 +396,8 @@ public class FishExperimentDisplay implements KeyListener, MouseListener {
 		ticksPerSecondLabel.setHorizontalAlignment(JLabel.LEFT);
 		ticksPerSecondLabel.setLabelFor(finalTicksPerSecField);
 		
-		controlPanel.add(ticksPerSecondLabel);
-		controlPanel.add(finalTicksPerSecField);
+		simControlPanel.add(ticksPerSecondLabel);
+		simControlPanel.add(finalTicksPerSecField);
 		ticksPerSecondField = finalTicksPerSecField;
 		
 		
@@ -402,24 +433,35 @@ public class FishExperimentDisplay implements KeyListener, MouseListener {
 		framesPerSecondLabel.setHorizontalAlignment(JLabel.LEFT);
 		framesPerSecondLabel.setLabelFor(finalFramesPerSecField);
 
-		controlPanel.add(framesPerSecondLabel);
-		controlPanel.add(finalFramesPerSecField);
+		simControlPanel.add(framesPerSecondLabel);
+		simControlPanel.add(finalFramesPerSecField);
 		framesPerSecondField = finalFramesPerSecField;
-
-		//packing up the window content and setting it to visible
-		window.setResizable(false);
-	    window.pack();
 		
-		window.setVisible(true);
+		return simControlPanel;
+	}
+	
+	private JPanel setupGodControlsPanel(Dimension preferredSize) {
+		JPanel godControlPanel = new JPanel();
+		godControlPanel.setPreferredSize(preferredSize);
+		godControlPanel.setBorder(new EmptyBorder(0, 0, 0, 0));
 		
-		//setting up buffer strategy for the canvas and focussing on it
-		canvas.createBufferStrategy(2);
-	  	buffer = canvas.getBufferStrategy();
-	  	
-		inspectorCanvas.createBufferStrategy(2);
-	  	inspectorBuffer = inspectorCanvas.getBufferStrategy();
-	      
-	    canvas.requestFocus();
+		final JButton finalFoodPlacementButton = new JButton("Place Food");
+		finalFoodPlacementButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                if (mouseMode == MouseMode.FOOD_PLACEMENT) {
+                	mouseMode = MouseMode.FISH_SELECT;
+                	finalFoodPlacementButton.setText("Place Food");
+                } else {
+                	mouseMode = MouseMode.FOOD_PLACEMENT;
+                	finalFoodPlacementButton.setText("Stop Food");
+                }
+            }
+        });
+		
+		godControlPanel.add(finalFoodPlacementButton);
+		foodPlacementButton = finalFoodPlacementButton;
+		
+		return godControlPanel;
 	}
 
 	public void keyTyped(KeyEvent e) {
@@ -475,11 +517,23 @@ public class FishExperimentDisplay implements KeyListener, MouseListener {
 			experiment.setPreferredFrameRate(framesInc);
 			framesPerSecondField.setValue(Integer.valueOf(framesInc));
 			break;
-		
+			
+		//ENABLE FOOD PLACEMENT
+		case KeyEvent.VK_F :
+			mouseMode = MouseMode.FOOD_PLACEMENT;
+			break;
+
 		//TOGGLE SHIFT (increases and decreases change rates)
 		case KeyEvent.VK_SHIFT :
 			this.shiftPressed = true;
 			break;
+			
+		//Escape the current situation. most likely the current mouse mode.
+		case KeyEvent.VK_ESCAPE :
+				if (mouseMode == MouseMode.FOOD_PLACEMENT) {
+					mouseMode = MouseMode.FISH_SELECT;
+					foodPlacementButton.setText("Place Food");
+				}
 		}	
 	}
 
@@ -490,14 +544,8 @@ public class FishExperimentDisplay implements KeyListener, MouseListener {
 			break;
 		}	
 	}
-
-
-	public void mouseClicked(MouseEvent e) {
-		
-	}
-
-
-	public void mousePressed(MouseEvent e) {
+	
+	private void handleFishSelect(MouseEvent e) {
 		if (e.getButton() == MouseEvent.BUTTON1) {
 			//checking each fish in the world for a collision
 			boolean collision = false;
@@ -514,6 +562,30 @@ public class FishExperimentDisplay implements KeyListener, MouseListener {
 			if (!collision) {				
 				selectedFish = null;
 			}
+		}
+	}
+	
+	private void handleFoodPlacement(MouseEvent e) {
+		if (e.getButton() == MouseEvent.BUTTON1) {
+			// NOTE: this could cause an exception due to modification of the food
+			// list while another thread is reading it. I know it's silly but i'm going
+			// to ignore it because i want to keep the simulation and rendering running
+			// concurrently without thread safety constructs for speed.
+			experiment.getWorld().food.add(new Food(e.getX(), e.getY()));
+		}
+	}
+
+
+	public void mouseClicked(MouseEvent e) {
+		
+	}
+
+
+	public void mousePressed(MouseEvent e) {
+		if (mouseMode == MouseMode.FISH_SELECT){
+			handleFishSelect(e);
+		} else if (mouseMode == MouseMode.FOOD_PLACEMENT){
+			handleFoodPlacement(e);
 		}
 	}
 
